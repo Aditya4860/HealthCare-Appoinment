@@ -25,6 +25,7 @@ model User {
   patientProfile     PatientProfile?
   appointments       Appointment[]  @relation("PatientAppointments")
   doctorAppointments Appointment[]  @relation("DoctorAppointments")
+  notifications      Notification[]
 }
 
 model DoctorProfile {
@@ -38,6 +39,7 @@ model DoctorProfile {
   bio            String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+  leaves         DoctorLeave[]
 }
 
 model PatientProfile {
@@ -58,9 +60,35 @@ model Appointment {
   patient     User     @relation("PatientAppointments", fields: [patientId], references: [id])
   doctor      User     @relation("DoctorAppointments",  fields: [doctorId],  references: [id])
   scheduledAt DateTime
-  /// AppointmentStatus: PENDING | CONFIRMED | CANCELLED | COMPLETED
-  status      String   @default("PENDING")
-  notes       String?
-  createdAt   DateTime @default(now())
+  /// AppointmentStatus: HOLD | PENDING | CONFIRMED | CANCELLED | COMPLETED
+  status         String   @default("PENDING")
+  notes          String?
+  symptoms       String?
+  patientSummary String?
+  urgencyLevel   String?
+  chiefConcern   String?
+  aiQuestions    String?
+  createdAt      DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model DoctorLeave {
+  id              String        @id @default(cuid())
+  doctorProfileId String
+  doctorProfile   DoctorProfile @relation(fields: [doctorProfileId], references: [id], onDelete: Cascade)
+  date            DateTime
+  createdAt       DateTime      @default(now())
+
+  @@unique([doctorProfileId, date])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  subject   String
+  body      String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
 }

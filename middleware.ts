@@ -1,74 +1,61 @@
-/**
- * middleware.ts — Edge-runtime route protection.
- *
- * Protects /patient/*, /doctor/*, /admin/* and their /api/* equivalents.
- * Uses inline JWT verification (jose) — no Node.js APIs, fully edge-safe.
- */
-
-import { NextRequest, NextResponse } from "next/server";
-import { jwtVerify } from "jose";
-
-const getSecret = () =>
-  new TextEncoder().encode(
-    process.env.JWT_SECRET ||
-      "change-me-before-production-at-least-32-chars"
-  );
-
-/** Maps a route prefix to the role that owns it. */
-const ROLE_FOR_PREFIX: Record<string, string> = {
-  "/patient": "PATIENT",
-  "/doctor": "DOCTOR",
-  "/admin": "ADMIN",
-  "/api/patient": "PATIENT",
-  "/api/doctor": "DOCTOR",
-  "/api/admin": "ADMIN",
-};
-
-const DASHBOARD_FOR_ROLE: Record<string, string> = {
-  PATIENT: "/patient/dashboard",
-  DOCTOR: "/doctor/dashboard",
-  ADMIN: "/admin/dashboard",
-};
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+import { verifyToken } from '@/lib/auth'
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-  const token = request.cookies.get("token")?.value;
+  const { pathname } = request.nextUrl
+  const token = request.cookies.get('token')?.value
 
-  if (!token) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
+  const isAuthPage = pathname.startsWith('/login') || pathname.startsWith('/register')
+  const isProtectedPage =
+    pathname.startsWith('/patient') ||
+    pathname.startsWith('/doctor') ||
+    pathname.startsWith('/admin')
+  const isProtectedApi =
+    pathname.startsWith('/api/patient') ||
+    pathname.startsWith('/api/doctor') ||
+    pathname.startsWith('/api/admin')
 
-  try {
-    const { payload } = await jwtVerify(token, getSecret());
-    const role = payload.role as string;
-
-    // Find the required role for this path prefix
-    const requiredRole = Object.entries(ROLE_FOR_PREFIX).find(([prefix]) =>
-      pathname.startsWith(prefix)
-    )?.[1];
-
-    // ADMIN can access all protected routes
-    if (requiredRole && role !== requiredRole && role !== "ADMIN") {
-      const fallback = DASHBOARD_FOR_ROLE[role] ?? "/login";
-      return NextResponse.redirect(new URL(fallback, request.url));
+  // If on auth page and already has valid token → redirect to correct dashboard
+  if (isAuthPage && token) {
+    const payload = await verifyToken(token)
+    if (payload) {
+      const role = (payload as { role: string }).role
+      if (role === 'ADMIN')  return NextResponse.redirect(new URL('/admin/dashboard', request.url))
+      if (role === 'DOCTOR') return NextResponse.redirect(new URL('/doctor/dashboard', request.url))
+      return NextResponse.redirect(new URL('/patient/dashboard', request.url))
     }
-
-    return NextResponse.next();
-  } catch {
-    // Token invalid / expired
-    const response = NextResponse.redirect(new URL("/login", request.url));
-    response.cookies.set("token", "", { maxAge: 0, path: "/" });
-    return response;
   }
+
+  // If on protected page/api without token → redirect to login
+  if ((isProtectedPage || isProtectedApi) && !token) {
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
+
+  // If on protected page with token → verify role matches path
+  if (isProtectedPage && token) {
+    const payload = await verifyToken(token)
+    if (!payload) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+    const role = (payload as { role: string }).role
+    if (pathname.startsWith('/admin')   && role !== 'ADMIN')   return NextResponse.redirect(new URL('/login', request.url))
+    if (pathname.startsWith('/doctor')  && role !== 'DOCTOR')  return NextResponse.redirect(new URL('/login', request.url))
+    if (pathname.startsWith('/patient') && role !== 'PATIENT') return NextResponse.redirect(new URL('/login', request.url))
+  }
+
+  return NextResponse.next()
 }
 
 export const config = {
   matcher: [
-    "/patient/:path*",
-    "/doctor/:path*",
-    "/admin/:path*",
-    "/api/patient/:path*",
-    "/api/doctor/:path*",
-    "/api/admin/:path*",
+    '/login',
+    '/register',
+    '/patient/:path*',
+    '/doctor/:path*',
+    '/admin/:path*',
+    '/api/patient/:path*',
+    '/api/doctor/:path*',
+    '/api/admin/:path*',
   ],
-};
+}

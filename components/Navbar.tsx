@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
@@ -13,8 +13,8 @@ interface NavbarProps {
 }
 
 const ROLE_PILL: Record<UserRole, string> = {
-  PATIENT: "bg-accent/30 text-white",
-  DOCTOR:  "bg-warn/30  text-white",
+  PATIENT: "bg-teal-500/20 text-white",
+  DOCTOR:  "bg-amber-500/20 text-white",
   ADMIN:   "bg-white/20 text-white",
 };
 
@@ -32,6 +32,27 @@ export function Navbar({ userName, role }: NavbarProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  
+  const [displayName, setDisplayName] = useState(userName);
+  const [displayRole, setDisplayRole] = useState(role);
+
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const res = await fetch("/api/auth/me");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.user) {
+            setDisplayName(data.user.name || data.user.email);
+            setDisplayRole(data.user.role as UserRole);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch user", e);
+      }
+    }
+    fetchUser();
+  }, []);
 
   async function handleSignOut() {
     setSigningOut(true);
@@ -57,13 +78,13 @@ export function Navbar({ userName, role }: NavbarProps) {
         {/* ── Desktop right ─────────────────────────────────────────────── */}
         <div className="hidden md:flex items-center gap-3">
           {/* User name */}
-          <span className="text-white/90 text-sm font-medium">{userName}</span>
+          <span className="text-white/90 text-sm font-medium">{displayName}</span>
 
           {/* Role badge */}
           <span
-            className={`${ROLE_PILL[role]} text-xs font-semibold px-2 py-0.5 rounded-full`}
+            className={`${ROLE_PILL[displayRole]} text-xs font-semibold px-2 py-0.5 rounded-full`}
           >
-            {ROLE_LABEL[role]}
+            {ROLE_LABEL[displayRole]}
           </span>
 
           {/* Divider */}
@@ -98,12 +119,12 @@ export function Navbar({ userName, role }: NavbarProps) {
           <div className="content-wrapper py-4 flex flex-col gap-3">
             <div className="flex items-center gap-3">
               <span className="text-white/90 text-sm font-medium">
-                {userName}
+                {displayName}
               </span>
               <span
-                className={`${ROLE_PILL[role]} text-xs font-semibold px-2 py-0.5 rounded-full`}
+                className={`${ROLE_PILL[displayRole]} text-xs font-semibold px-2 py-0.5 rounded-full`}
               >
-                {ROLE_LABEL[role]}
+                {ROLE_LABEL[displayRole]}
               </span>
             </div>
 

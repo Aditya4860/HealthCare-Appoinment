@@ -1,27 +1,22 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import { verifyToken } from "@/lib/auth";
+import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
+import { verifyToken } from '@/lib/auth'
 
-const REDIRECT_MAP: Record<string, string> = {
-  PATIENT: "/patient/dashboard",
-  DOCTOR: "/doctor/dashboard",
-  ADMIN: "/admin/dashboard",
-};
-
-/**
- * Root page: redirects authenticated users to their dashboard,
- * everyone else to /login.
- */
 export default async function RootPage() {
-  const cookieStore = cookies();
-  const token = cookieStore.get("token")?.value;
+  const cookieStore = cookies()
+  const token = cookieStore.get('token')?.value
 
-  if (token) {
-    const session = await verifyToken(token);
-    if (session) {
-      redirect(REDIRECT_MAP[session.role] ?? "/patient/dashboard");
-    }
+  if (!token) {
+    redirect('/login')
   }
 
-  redirect("/login");
+  const payload = await verifyToken(token)
+  if (!payload) {
+    redirect('/login')
+  }
+
+  const role = (payload as { role: string }).role
+  if (role === 'ADMIN')  redirect('/admin/dashboard')
+  if (role === 'DOCTOR') redirect('/doctor/dashboard')
+  redirect('/patient/dashboard')
 }

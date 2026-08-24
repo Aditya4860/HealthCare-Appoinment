@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   Eye,
@@ -45,7 +44,6 @@ function StatCard({
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -71,7 +69,16 @@ export default function LoginPage() {
         return;
       }
 
-      router.push(data.redirect);
+      // Use window.location.href (full reload) so middleware re-reads the new
+      // cookie before serving the protected dashboard page.
+      const role = data.user?.role;
+      if (role === "ADMIN") {
+        window.location.href = "/admin/dashboard";
+      } else if (role === "DOCTOR") {
+        window.location.href = "/doctor/dashboard";
+      } else {
+        window.location.href = "/patient/dashboard";
+      }
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -228,11 +235,34 @@ export default function LoginPage() {
               <div
                 role="alert"
                 className="bg-danger/8 border border-danger/20 text-danger text-sm
-                           px-4 py-3 rounded-xl leading-relaxed"
+                           px-4 py-3 rounded-xl leading-relaxed mt-2"
               >
                 {error}
               </div>
             )}
+            
+            {/* Demo accounts */}
+            <div>
+              <p className="text-xs text-muted text-center mt-4 mb-2">Demo accounts</p>
+              <div className="flex flex-col gap-1">
+                {[
+                  { label: 'Admin', email: 'admin@test.com', password: 'Admin123!' },
+                  { label: 'Doctor', email: 'doctor@test.com', password: 'Doctor123!' },
+                  { label: 'Patient', email: 'patient@test.com', password: 'Patient123!' },
+                ].map((account) => (
+                  <button
+                    key={account.label}
+                    type="button"
+                    onClick={() => { setEmail(account.email); setPassword(account.password) }}
+                    className="text-xs text-brand hover:underline text-left px-2 py-1 
+                               rounded hover:bg-brand-light transition-colors"
+                  >
+                    <span className="font-medium">{account.label}:</span> {account.email}
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-muted text-center mt-2">Click any account to auto-fill</p>
+            </div>
           </form>
 
           <p className="text-sm text-muted text-center mt-7">

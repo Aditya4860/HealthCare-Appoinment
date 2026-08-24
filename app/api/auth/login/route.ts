@@ -1,68 +1,51 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import bcrypt from "bcryptjs";
-import { z } from "zod";
-import { signToken, setTokenCookie } from "@/lib/auth";
+import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+import bcrypt from 'bcryptjs'
+import { signToken } from '@/lib/auth'
+import { z } from 'zod'
 
-const loginSchema = z.object({
+const schema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
-});
-
-const REDIRECT_MAP: Record<string, string> = {
-  PATIENT: "/patient/dashboard",
-  DOCTOR: "/doctor/dashboard",
-  ADMIN: "/admin/dashboard",
-};
+})
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { email, password } = loginSchema.parse(body);
+    const body = await request.json()
+    const { email, password } = schema.parse(body)
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({ where: { email } })
+    if (!user) {
+      return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
+    }
 
-    // Use constant-time comparison to avoid timing attacks
-    const passwordMatch = user
-      ? await bcrypt.compare(password, user.password)
-      : false;
-
-    if (!user || !passwordMatch) {
-      return NextResponse.json(
-        { error: "Invalid email or password" },
-        { status: 401 }
-      );
+    const valid = await bcrypt.compare(password, user.password)
+    if (!valid) {
+      return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
     }
 
     const token = await signToken({
       userId: user.id,
       email: user.email,
       role: user.role,
-      name: user.name ?? "",
-    });
-
-    const redirect = REDIRECT_MAP[user.role] ?? "/patient/dashboard";
+      name: user.name ?? '',
+    })
 
     const response = NextResponse.json({
-      message: "Login successful",
-      redirect,
-      user: {
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
-    });
+      user: { id: user.id, name: user.name, email: user.email, role: user.role },
+    })
 
-    setTokenCookie(response, token);
-    return response;
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: "Invalid input" }, { status: 400 });
-    }
-    console.error("[login]", error);
-    return NextResponse.json(
-      { error: "Something went wrong. Please try again." },
-      { status: 500 }
-    );
+    // Set cookie directly on the response object
+    response.cookies.set('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: '/',
+    })
+
+    return response
+  } catch {
+    return NextResponse.json({ error: 'Login failed' }, { status: 500 })
   }
 }

@@ -2,7 +2,9 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { verifyToken } from "@/lib/auth";
 import { Navbar } from "@/components/Navbar";
-import { Users, Stethoscope, CalendarCheck, Shield } from "lucide-react";
+import { prisma } from "@/lib/prisma";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export const metadata = {
   title: "Admin Dashboard — MediBook",
@@ -17,81 +19,77 @@ export default async function AdminDashboardPage() {
   const session = await verifyToken(token);
   if (!session || session.role !== "ADMIN") redirect("/login");
 
+  // Fetch actual stats
+  const totalDoctors = await prisma.user.count({ where: { role: "DOCTOR" } });
+  const totalPatients = await prisma.user.count({ where: { role: "PATIENT" } });
+  
+  // Appointments today
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
+  const endOfDay = new Date();
+  endOfDay.setHours(23, 59, 59, 999);
+  
+  const appointmentsToday = await prisma.appointment.count({
+    where: {
+      scheduledAt: {
+        gte: startOfDay,
+        lt: endOfDay,
+      }
+    }
+  });
+
+  // Cancelled this week (Assuming last 7 days)
+  const startOfWeek = new Date();
+  startOfWeek.setDate(startOfWeek.getDate() - 7);
+  const cancelledThisWeek = await prisma.appointment.count({
+    where: {
+      status: "CANCELLED",
+      updatedAt: { gte: startOfWeek }
+    }
+  });
+
   return (
     <div className="min-h-screen bg-surface">
       <Navbar userName={session.name || session.email} role="ADMIN" />
 
-      <main className="content-wrapper py-8">
-        {/* Welcome */}
-        <div className="mb-8 flex items-center gap-3">
-          <div className="w-10 h-10 bg-brand-light rounded-xl flex items-center justify-center">
-            <Shield size={20} className="text-brand" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-slate-800">
-              Admin Dashboard
-            </h1>
-            <p className="text-muted text-sm">
-              Signed in as {session.name ?? session.email}
-            </p>
-          </div>
-        </div>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <h1 className="text-2xl font-bold font-sora text-brand mb-6">
+          Admin Dashboard
+        </h1>
 
-        {/* Stat cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {/* Stats row */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
           {[
-            {
-              label: "Total users",
-              value: "3",
-              icon: <Users size={20} className="text-brand" />,
-              iconBg: "bg-brand-light",
-            },
-            {
-              label: "Doctors",
-              value: "1",
-              icon: <Stethoscope size={20} className="text-warn" />,
-              iconBg: "bg-warn/10",
-            },
-            {
-              label: "Patients",
-              value: "1",
-              icon: <Users size={20} className="text-accent" />,
-              iconBg: "bg-accent/10",
-            },
-            {
-              label: "Appointments",
-              value: "0",
-              icon: <CalendarCheck size={20} className="text-muted" />,
-              iconBg: "bg-slate-100",
-            },
-          ].map((card) => (
-            <div key={card.label} className="card flex items-center gap-4">
-              <div
-                className={`w-11 h-11 ${card.iconBg} rounded-xl flex items-center justify-center flex-shrink-0`}
-              >
-                {card.icon}
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-slate-800">
-                  {card.value}
-                </p>
-                <p className="text-xs text-muted">{card.label}</p>
-              </div>
+            { label: "Total Doctors", value: totalDoctors },
+            { label: "Today's Appointments", value: appointmentsToday },
+            { label: "Active Patients", value: totalPatients },
+            { label: "Cancelled This Week", value: cancelledThisWeek },
+          ].map((stat) => (
+            <div key={stat.label} className="bg-white rounded-2xl border border-border p-5 shadow-sm">
+              <p className="text-3xl font-semibold font-sora text-brand mb-1">
+                {stat.value}
+              </p>
+              <p className="text-sm text-muted font-inter">
+                {stat.label}
+              </p>
             </div>
           ))}
         </div>
 
-        {/* Placeholder */}
-        <div className="card text-center py-12">
-          <Shield size={40} className="text-brand/30 mx-auto mb-4" />
-          <h2 className="text-lg font-semibold text-slate-700 mb-2">
-            System ready
-          </h2>
-          <p className="text-sm text-muted">
-            User management, doctor onboarding, and appointment monitoring will
-            appear here.
-          </p>
+        {/* Doctors Section */}
+        <div className="flex items-center justify-between border-b border-border pb-4 mb-6">
+          <h2 className="text-xl font-bold font-sora text-slate-800">Doctors</h2>
+          <Link href="/admin/doctors">
+            <Button variant="default" className="bg-brand hover:bg-brand/90 text-white">
+              Add Doctor
+            </Button>
+          </Link>
         </div>
+        
+        <p className="text-sm text-muted font-inter">
+          Manage your hospital's doctors from the Doctors page.
+        </p>
+
       </main>
     </div>
   );
