@@ -79,8 +79,31 @@ export async function holdSlot(patientId: string, doctorId: string, date: string
   // within a transaction. Since this is just SQLite, it's sequential anyway.
   
   const scheduledAt = parseISTToUTC(date, time);
+  if (scheduledAt < new Date()) {
+    throw new Error("Cannot book slots in the past");
+  }
 
   return await prisma.$transaction(async (tx) => {
+    const profile = await tx.doctorProfile.findFirst({
+      where: { userId: doctorId }
+    });
+    if (!profile) throw new Error("Doctor not found");
+
+    const targetDate = new Date(`${date}T00:00:00.000Z`);
+    const onLeave = await tx.doctorLeave.findFirst({
+      where: { doctorProfileId: profile.id, date: targetDate }
+    });
+    if (onLeave) throw new Error("Doctor is unavailable on this date");
+
+    let workingHours = { start: "09:00", end: "17:00" };
+    try { workingHours = JSON.parse(profile.workingHours); } catch {}
+    
+    // Check if slot falls outside working hours using generateSlots
+    const validSlots = generateSlots(workingHours, profile.slotDuration);
+    if (!validSlots.includes(time)) {
+      throw new Error("This slot is outside the doctor's working hours");
+    }
+
     // 1. Check if it's already booked/held
     const existing = await tx.appointment.findFirst({
       where: {

@@ -93,7 +93,8 @@ export async function PATCH(
       include: { user: true }
     });
 
-    return NextResponse.json({ profile: updated });
+    const { password: _, ...safeUser } = updated.user;
+    return NextResponse.json({ profile: { ...updated, user: safeUser } });
   } catch (error) {
     console.error("[PATCH /api/admin/doctors/[id]]", error);
     return NextResponse.json(

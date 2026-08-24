@@ -1,6 +1,7 @@
 import { Resend } from "resend";
+import { env } from "@/lib/env";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(env.RESEND_API_KEY);
 
 export async function queueEmail(prisma: any, userId: string, type: string, subject: string, body: string) {
   await prisma.notification.create({

@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
     }
     console.error("[register]", error);
     return NextResponse.json(
-      { error: "Something went wrong. Please try again." },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

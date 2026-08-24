@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Navbar } from "@/components/Navbar";
+import { Sidebar } from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
 import { Loader2, Calendar as CalIcon, Clock, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { formatIST } from "@/lib/timezone";
@@ -153,9 +153,12 @@ export default function BookAppointmentPage() {
   const todayStr = new Date().toISOString().split("T")[0];
 
   return (
-    <div className="min-h-screen bg-surface">
-      <Navbar userName="Patient" role="PATIENT" />
-
+    <div className="min-h-screen bg-[#F8FAFC]">
+      <Sidebar role="PATIENT" userName="Patient" />
+      <div className="md:ml-60 mt-14 md:mt-0">
+        <header className="h-16 bg-white border-b border-slate-200 flex items-center px-6 sticky top-0 z-30">
+          <h1 className="text-lg font-semibold text-[#0F172A]">Book Appointment</h1>
+        </header>
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Progress Indicator */}
         <div className="mb-10 relative">
@@ -425,6 +428,7 @@ export default function BookAppointmentPage() {
         )}
 
       </main>
+      </div>
     </div>
   );
 }

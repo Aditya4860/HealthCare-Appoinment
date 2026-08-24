@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Navbar } from "@/components/Navbar";
+import { DashboardLayout } from "@/components/DashboardLayout";
 import { Loader2, Plus, Search, Calendar as CalIcon, User, Settings, ArrowLeft } from "lucide-react";
 import { formatIST } from "@/lib/timezone";
 import Link from "next/link";
@@ -116,16 +116,9 @@ export default function AdminDoctorsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-surface">
-      <Navbar userName="Admin" role="ADMIN" />
-
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Link href="/admin/dashboard" className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors mb-6 text-sm font-inter">
-          <ArrowLeft size={16} /> Back to Dashboard
-        </Link>
-        
-        <div className="flex items-center justify-between mb-8 border-b border-slate-200 pb-4">
-          <h1 className="text-2xl font-bold font-sora text-brand">Doctors</h1>
+    <DashboardLayout role="ADMIN" userName="Admin" pageTitle="Doctors">
+      <div className="flex items-center justify-between mb-8">
+        <p className="text-slate-500 text-sm">{doctors.length} doctor{doctors.length !== 1 ? "s" : ""} registered</p>
           
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 px-4 py-2 bg-brand hover:bg-brand/90 text-white">
@@ -293,7 +286,6 @@ export default function AdminDoctorsPage() {
             )}
           </div>
         )}
-      </main>
-    </div>
+    </DashboardLayout>
   );
 }

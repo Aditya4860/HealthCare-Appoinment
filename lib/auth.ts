@@ -10,9 +10,11 @@ import { SignJWT, jwtVerify } from "jose";
 import { NextRequest, NextResponse } from "next/server";
 
 // ── Secret ────────────────────────────────────────────────────────────────────
+import { env } from "@/lib/env";
+
 function getSecret(): Uint8Array {
   return new TextEncoder().encode(
-    process.env.JWT_SECRET ||
+    env.JWT_SECRET ||
       "change-me-before-production-at-least-32-chars"
   );
 }
@@ -89,7 +91,7 @@ export async function getServerSession(): Promise<SessionPayload | null> {
 export function setTokenCookie(response: NextResponse, token: string): void {
   response.cookies.set("token", token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: env.NODE_ENV === "production",
     sameSite: "lax",
     maxAge: 60 * 60 * 24 * 7, // 7 days
     path: "/",
@@ -99,7 +101,7 @@ export function setTokenCookie(response: NextResponse, token: string): void {
 export function clearTokenCookie(response: NextResponse): void {
   response.cookies.set("token", "", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: env.NODE_ENV === "production",
     sameSite: "lax",
     maxAge: 0,
     path: "/",

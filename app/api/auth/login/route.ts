@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { signToken } from '@/lib/auth'
 import { z } from 'zod'
+import { env } from '@/lib/env'
 
 const schema = z.object({
   email: z.string().email(),
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
     // Set cookie directly on the response object
     response.cookies.set('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7, // 7 days
       path: '/',
@@ -46,6 +47,6 @@ export async function POST(request: NextRequest) {
 
     return response
   } catch {
-    return NextResponse.json({ error: 'Login failed' }, { status: 500 })
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

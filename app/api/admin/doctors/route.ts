@@ -69,7 +69,8 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ user }, { status: 201 });
+    const { password: _, ...safeUser } = user;
+    return NextResponse.json({ user: safeUser }, { status: 201 });
   } catch (error) {
     console.error("[POST /api/admin/doctors]", error);
     return NextResponse.json(
@@ -96,7 +97,8 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: "desc" },
     });
 
-    return NextResponse.json({ doctors });
+    const safeDoctors = doctors.map(({ password, ...doc }) => doc);
+    return NextResponse.json({ doctors: safeDoctors });
   } catch (error) {
     console.error("[GET /api/admin/doctors]", error);
     return NextResponse.json(

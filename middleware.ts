@@ -27,21 +27,32 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // If on protected page/api without token → redirect to login
-  if ((isProtectedPage || isProtectedApi) && !token) {
+  if (isProtectedApi && !token) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+  
+  if (isProtectedPage && !token) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // If on protected page with token → verify role matches path
-  if (isProtectedPage && token) {
+  // If on protected page/api with token → verify role matches path
+  if ((isProtectedPage || isProtectedApi) && token) {
     const payload = await verifyToken(token)
     if (!payload) {
-      return NextResponse.redirect(new URL('/login', request.url))
+      if (isProtectedApi) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.redirect(new URL('/login?expired=true', request.url))
     }
     const role = (payload as { role: string }).role
-    if (pathname.startsWith('/admin')   && role !== 'ADMIN')   return NextResponse.redirect(new URL('/login', request.url))
-    if (pathname.startsWith('/doctor')  && role !== 'DOCTOR')  return NextResponse.redirect(new URL('/login', request.url))
-    if (pathname.startsWith('/patient') && role !== 'PATIENT') return NextResponse.redirect(new URL('/login', request.url))
+    
+    if (isProtectedApi) {
+      if (pathname.startsWith('/api/admin')   && role !== 'ADMIN')   return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      if (pathname.startsWith('/api/doctor')  && role !== 'DOCTOR')  return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+      if (pathname.startsWith('/api/patient') && role !== 'PATIENT') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    } else if (isProtectedPage) {
+      if (pathname.startsWith('/admin')   && role !== 'ADMIN')   return NextResponse.redirect(new URL(`/${role.toLowerCase()}/dashboard`, request.url))
+      if (pathname.startsWith('/doctor')  && role !== 'DOCTOR')  return NextResponse.redirect(new URL(`/${role.toLowerCase()}/dashboard`, request.url))
+      if (pathname.startsWith('/patient') && role !== 'PATIENT') return NextResponse.redirect(new URL(`/${role.toLowerCase()}/dashboard`, request.url))
+    }
   }
 
   return NextResponse.next()

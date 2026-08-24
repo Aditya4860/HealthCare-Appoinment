@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Navbar } from "@/components/Navbar";
+import { Sidebar } from "@/components/Sidebar";
 import { Loader2, ArrowLeft, Calendar, Clock, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -70,10 +70,10 @@ export default function AppointmentDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-surface flex flex-col">
-        <Navbar userName="Patient" role="PATIENT" />
-        <div className="flex-1 flex items-center justify-center">
-          <Loader2 size={32} className="animate-spin text-brand" />
+      <div className="min-h-screen bg-[#F8FAFC] flex">
+        <Sidebar role="PATIENT" userName="Patient" />
+        <div className="md:ml-60 flex-1 flex items-center justify-center mt-14 md:mt-0">
+          <Loader2 size={32} className="animate-spin text-[#7C6FCD]" />
         </div>
       </div>
     );
@@ -99,13 +99,16 @@ export default function AppointmentDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-surface">
-      <Navbar userName="Patient" role="PATIENT" />
-
+    <div className="min-h-screen bg-[#F8FAFC]">
+      <Sidebar role="PATIENT" userName="Patient" />
+      <div className="md:ml-60 mt-14 md:mt-0">
+        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-30">
+          <Link href="/patient/appointments" className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-[#1B3A6B] transition-colors">
+            <ArrowLeft size={16} /> Back to Appointments
+          </Link>
+          <StatusBadge status={appointment.status as any} />
+        </header>
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Link href="/patient/dashboard" className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-brand font-inter mb-6 transition-colors">
-          <ArrowLeft size={16} /> My Appointments
-        </Link>
         
         {/* Header Card */}
         <div className="bg-brand text-white rounded-2xl p-6 shadow-md mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -291,6 +294,7 @@ export default function AppointmentDetailPage() {
           
         </div>
       </main>
+      </div>
     </div>
   );
 }

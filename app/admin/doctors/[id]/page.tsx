@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Navbar } from "@/components/Navbar";
+import { Sidebar } from "@/components/Sidebar";
 import { CheckCircle2, User, Loader2, ArrowLeft, Stethoscope, Clock, Calendar as CalIcon, Settings, X, Plus } from "lucide-react";
 import { formatIST } from "@/lib/timezone";
 import Link from "next/link";
@@ -146,10 +146,10 @@ export default function DoctorDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-surface flex flex-col">
-        <Navbar userName="Admin" role="ADMIN" />
-        <div className="flex-1 flex items-center justify-center">
-          <Loader2 size={32} className="animate-spin text-brand" />
+      <div className="min-h-screen bg-[#F8FAFC] flex">
+        <Sidebar role="ADMIN" userName="Admin" />
+        <div className="md:ml-60 flex-1 flex items-center justify-center mt-14 md:mt-0">
+          <Loader2 size={32} className="animate-spin text-[#7C6FCD]" />
         </div>
       </div>
     );
@@ -158,14 +158,15 @@ export default function DoctorDetailPage() {
   if (!doctor) return null;
 
   return (
-    <div className="min-h-screen bg-surface">
-      <Navbar userName="Admin" role="ADMIN" />
-
+    <div className="min-h-screen bg-[#F8FAFC]">
+      <Sidebar role="ADMIN" userName="Admin" />
+      <div className="md:ml-60 mt-14 md:mt-0">
+        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-30">
+          <Link href="/admin/doctors" className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-[#1B3A6B] transition-colors">
+            <ArrowLeft size={16} /> Back to Doctors
+          </Link>
+        </header>
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Link href="/admin/doctors" className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors mb-6 text-sm font-inter">
-          <ArrowLeft size={16} /> Back to Doctors
-        </Link>
-        
         <div className="mb-8">
           <h1 className="text-3xl font-bold font-sora text-slate-800">{doctor.name}</h1>
           <p className="text-slate-500 font-inter mt-1">{doctor.email}</p>
@@ -273,6 +274,7 @@ export default function DoctorDetailPage() {
           </div>
         </div>
       </main>
+      </div>
     </div>
   );
 }

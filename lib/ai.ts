@@ -1,6 +1,15 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
+import { env } from "@/lib/env";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const ai = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY });
+
+async function withTimeout<T>(promise: Promise<T>, ms: number = 15000): Promise<T> {
+  let timeoutId: NodeJS.Timeout;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error(`Operation timed out after ${ms}ms`)), ms);
+  });
+  return Promise.race([promise, timeoutPromise]).finally(() => clearTimeout(timeoutId));
+}
 
 export async function getPreVisitSummary(symptoms: string) {
   const fallback = {
@@ -15,7 +24,7 @@ export async function getPreVisitSummary(symptoms: string) {
   };
 
   try {
-    const response = await ai.models.generateContent({
+    const response = await withTimeout(ai.models.generateContent({
       model: "gemini-3.6-flash",
       contents: `You are a decision-support summarizer for a general-practice doctor. Analyze the patient symptoms and respond ONLY with valid JSON. Do NOT diagnose the patient.
 
@@ -58,7 +67,7 @@ Symptoms: ${symptoms}`,
           required: ["urgency", "chiefConcern", "suggestedQuestions"]
         } as Schema
       }
-    });
+    }));
 
     const text = response.text;
     if (!text) throw new Error("Empty response");
@@ -109,7 +118,7 @@ Symptoms: ${symptoms}`,
 
 export async function getPostVisitSummary(notes: string, prescription: string) {
   try {
-    const response = await ai.models.generateContent({
+    const response = await withTimeout(ai.models.generateContent({
       model: "gemini-3.6-flash",
       contents: `Convert these clinical notes into a patient-friendly summary. Respond ONLY with valid JSON, no markdown:
 {
@@ -145,7 +154,7 @@ Prescription: ${prescription}`,
           required: ["summary", "medicationSchedule", "followUpSteps"]
         } as Schema
       }
-    });
+    }));
 
     const text = response.text;
     if (!text) throw new Error("Empty response");
