@@ -68,6 +68,8 @@ model Appointment {
   urgencyLevel   String?
   chiefConcern   String?
   aiQuestions    String?
+  prescription   String?
+  medications    String?
   createdAt      DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
