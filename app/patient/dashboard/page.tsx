@@ -88,7 +88,7 @@ export default async function PatientDashboardPage() {
                       
                       <div className="mb-3">
                         <h3 className="font-semibold font-inter text-slate-800">
-                          Dr. {app.doctor.name}
+                          {app.doctor.name}
                         </h3>
                         <span className="inline-block bg-brand-light text-brand text-xs px-2 py-0.5 rounded-full font-inter font-medium mt-1">
                           {app.doctor.doctorProfile?.specialisation}
@@ -100,7 +100,7 @@ export default async function PatientDashboardPage() {
                           <span className={`text-xs font-semibold px-2 py-0.5 rounded flex-shrink-0 ${app.urgencyLevel === "High" ? "bg-danger/10 text-danger" : "bg-warn/10 text-warn-700"}`}>
                             {app.urgencyLevel} Urgency
                           </span>
-                          <p className="text-xs text-slate-600 font-inter line-clamp-1">{app.chiefConcern}</p>
+                          <p className="text-xs text-slate-600 font-inter">{app.chiefConcern}</p>
                         </div>
                       )}
                       

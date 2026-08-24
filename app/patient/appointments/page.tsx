@@ -65,7 +65,7 @@ export default function AllAppointmentsPage() {
                         {app.doctor.name?.substring(0,2).toUpperCase() || "DR"}
                       </div>
                       <div>
-                        <h3 className="font-semibold font-inter text-slate-800">Dr. {app.doctor.name}</h3>
+                        <h3 className="font-semibold font-inter text-slate-800">{app.doctor.name}</h3>
                         <span className="inline-block bg-brand-light text-brand text-xs px-2 py-0.5 rounded-full font-inter font-medium mt-1">
                           {app.doctor.doctorProfile?.specialisation}
                         </span>

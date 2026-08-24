@@ -136,7 +136,7 @@ export default async function DoctorDashboardPage() {
                               <span className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded ${slot.appointment.urgencyLevel === "High" ? "bg-danger/10 text-danger" : "bg-warn/10 text-warn-700"}`}>
                                 {slot.appointment.urgencyLevel}
                               </span>
-                              <span className="text-sm text-slate-500 font-inter truncate">{slot.appointment.chiefConcern}</span>
+                              <span className="text-sm text-slate-500 font-inter">{slot.appointment.chiefConcern}</span>
                             </div>
                           )}
                           

@@ -101,7 +101,6 @@ export default function AppointmentDetailPage() {
         <div className="bg-brand text-white rounded-2xl p-6 shadow-md mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <span className="text-white/70 text-sm font-inter font-medium">Dr.</span>
               <h1 className="font-sora text-2xl font-bold">{appointment.doctor.name}</h1>
             </div>
             <span className="inline-block bg-white/20 text-white text-xs px-3 py-1 rounded-full font-inter font-medium">
@@ -117,7 +116,18 @@ export default function AppointmentDetailPage() {
                 <Clock size={18} /> {timeStr}
               </div>
             </div>
-            <StatusBadge status={appointment.status as any} className="bg-white" />
+            {(() => {
+              const status = appointment.status;
+              let badgeClass = "";
+              if (status === "CONFIRMED") badgeClass = "bg-green-400/30 text-white border border-green-300/50 px-3 py-1 rounded-full text-xs font-medium";
+              else if (status === "CANCELLED") badgeClass = "bg-red-400/30 text-white border border-red-300/50 px-3 py-1 rounded-full text-xs font-medium";
+              else if (status === "COMPLETED") badgeClass = "bg-blue-300/30 text-white border border-blue-200/50 px-3 py-1 rounded-full text-xs font-medium";
+              else if (status === "HOLD") badgeClass = "bg-amber-400/30 text-white border border-amber-300/50 px-3 py-1 rounded-full text-xs font-medium";
+              else badgeClass = "bg-white/20 text-white border border-white/30 px-3 py-1 rounded-full text-xs font-medium";
+              
+              const label = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+              return <span className={badgeClass}>{label}</span>;
+            })()}
           </div>
         </div>
 
@@ -173,10 +183,50 @@ export default function AppointmentDetailPage() {
 
             {/* Visit Summary (Post-appointment) */}
             {appointment.patientSummary && (
-              <div className="bg-accent/5 rounded-2xl border border-accent/20 p-6 shadow-sm">
-                <h2 className="text-lg font-bold font-sora text-accent mb-4">Your Visit Summary</h2>
-                <div className="prose prose-sm prose-slate max-w-none font-inter whitespace-pre-wrap">
-                  {appointment.patientSummary}
+              <div className="bg-accent/5 border border-accent/20 rounded-2xl p-6 shadow-sm mt-8">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-6 h-6 bg-accent rounded-full flex items-center justify-center">
+                    <span className="text-white text-xs">✓</span>
+                  </div>
+                  <h3 className="font-semibold text-accent font-sora">Your Visit Summary</h3>
+                </div>
+                <p className="text-sm text-slate-700 leading-relaxed font-inter">{appointment.patientSummary}</p>
+                
+                {/* Medication schedule if available */}
+                {appointment.medications && appointment.medications !== "[]" && (
+                  <div className="mt-6">
+                    <h4 className="text-sm font-medium text-slate-600 mb-3 font-inter">Medication Schedule</h4>
+                    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                      <table className="w-full text-sm">
+                        <thead className="bg-slate-50">
+                          <tr>
+                            <th className="text-left p-3 text-xs text-slate-500 font-semibold font-inter">Medicine</th>
+                            <th className="text-left p-3 text-xs text-slate-500 font-semibold font-inter">Dose</th>
+                            <th className="text-left p-3 text-xs text-slate-500 font-semibold font-inter">Frequency</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {JSON.parse(appointment.medications).map((med: any, i: number) => (
+                            <tr key={i} className="border-t border-slate-100 hover:bg-slate-50/50 transition-colors">
+                              <td className="p-3 font-medium text-slate-800 font-inter">{med.medicine}</td>
+                              <td className="p-3 text-slate-600 font-inter">{med.dose}</td>
+                              <td className="p-3 text-slate-600 font-inter">{med.frequency}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Original Prescription Text */}
+            {appointment.prescription && (
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm mt-8">
+                <h3 className="text-lg font-bold font-sora text-slate-800 mb-4">Doctor's Prescription</h3>
+                <div className="bg-slate-50 rounded-xl p-4 text-sm text-slate-700 font-inter whitespace-pre-wrap border border-slate-100">
+                  {appointment.prescription}
                 </div>
               </div>
             )}
@@ -211,7 +261,7 @@ export default function AppointmentDetailPage() {
                     <DialogHeader>
                       <DialogTitle className="font-sora text-danger">Cancel Appointment</DialogTitle>
                       <DialogDescription className="font-inter">
-                        Are you sure you want to cancel this appointment with Dr. {appointment.doctor.name}? This action cannot be undone.
+                        Are you sure you want to cancel this appointment with {appointment.doctor.name}? This action cannot be undone.
                       </DialogDescription>
                     </DialogHeader>
                     <DialogFooter className="mt-4 gap-2 sm:gap-0">
