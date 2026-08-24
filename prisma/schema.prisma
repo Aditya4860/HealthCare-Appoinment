@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Role values: ADMIN | DOCTOR | PATIENT
+// AppointmentStatus values: PENDING | CONFIRMED | CANCELLED | COMPLETED
+// workingHours stored as JSON string: { "start": "09:00", "end": "17:00" }
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  /// Role: ADMIN | DOCTOR | PATIENT
+  role      String   @default("PATIENT")
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  doctorProfile      DoctorProfile?
+  patientProfile     PatientProfile?
+  appointments       Appointment[]  @relation("PatientAppointments")
+  doctorAppointments Appointment[]  @relation("DoctorAppointments")
+}
+
+model DoctorProfile {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  specialisation String
+  slotDuration   Int      @default(30)
+  /// JSON string: { "start": "HH:mm", "end": "HH:mm" }
+  workingHours   String
+  bio            String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model PatientProfile {
+  id          String    @id @default(cuid())
+  userId      String    @unique
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dateOfBirth DateTime?
+  phone       String?
+  address     String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Appointment {
+  id          String   @id @default(cuid())
+  patientId   String
+  doctorId    String
+  patient     User     @relation("PatientAppointments", fields: [patientId], references: [id])
+  doctor      User     @relation("DoctorAppointments",  fields: [doctorId],  references: [id])
+  scheduledAt DateTime
+  /// AppointmentStatus: PENDING | CONFIRMED | CANCELLED | COMPLETED
+  status      String   @default("PENDING")
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
