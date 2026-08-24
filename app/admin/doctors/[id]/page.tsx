@@ -149,18 +149,18 @@ export default function DoctorDetailPage() {
       <Navbar userName="Admin" role="ADMIN" />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Link href="/admin/doctors" className="inline-flex items-center gap-2 text-muted hover:text-slate-800 transition-colors mb-6 text-sm font-inter">
+        <Link href="/admin/doctors" className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors mb-6 text-sm font-inter">
           <ArrowLeft size={16} /> Back to Doctors
         </Link>
         
         <div className="mb-8">
           <h1 className="text-3xl font-bold font-sora text-slate-800">{doctor.name}</h1>
-          <p className="text-muted font-inter mt-1">{doctor.email}</p>
+          <p className="text-slate-500 font-inter mt-1">{doctor.email}</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column: Doctor Profile (col-span-2) */}
-          <div className="lg:col-span-2 bg-white rounded-2xl border border-border p-6 shadow-sm h-fit">
+          <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm h-fit">
             <h2 className="text-xl font-bold font-sora text-slate-800 mb-6">Doctor Profile</h2>
             <form onSubmit={handleUpdateProfile} className="space-y-6">
               
@@ -194,10 +194,10 @@ export default function DoctorDetailPage() {
           </div>
 
           {/* Right Column: Leave Management (col-span-1) */}
-          <div className="lg:col-span-1 bg-white rounded-2xl border border-border p-6 shadow-sm h-fit flex flex-col gap-6">
+          <div className="lg:col-span-1 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm h-fit flex flex-col gap-6">
             <div>
               <h2 className="text-xl font-bold font-sora text-slate-800 mb-2">Leave Management</h2>
-              <p className="text-sm text-muted font-inter">
+              <p className="text-sm text-slate-500 font-inter">
                 Mark dates when this doctor is unavailable. Existing bookings will be cancelled.
               </p>
             </div>
@@ -220,7 +220,7 @@ export default function DoctorDetailPage() {
             <div className="mt-2">
               <h3 className="text-sm font-semibold text-slate-700 mb-3 font-inter">Scheduled Leaves</h3>
               {doctor.doctorProfile?.leaves?.length === 0 ? (
-                <p className="text-sm text-muted font-inter italic">No leave days scheduled.</p>
+                <p className="text-sm text-slate-500 font-inter italic">No leave days scheduled.</p>
               ) : (
                 <ul className="space-y-2">
                   {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}

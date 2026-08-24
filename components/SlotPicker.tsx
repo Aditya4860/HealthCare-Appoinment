@@ -26,7 +26,7 @@ interface SlotPickerProps {
 export function SlotPicker({ slots, selectedSlotId, onSelect }: SlotPickerProps) {
   if (slots.length === 0) {
     return (
-      <p className="text-sm text-muted text-center py-6">
+      <p className="text-sm text-slate-500 text-center py-6">
         No slots available for this date.
       </p>
     );

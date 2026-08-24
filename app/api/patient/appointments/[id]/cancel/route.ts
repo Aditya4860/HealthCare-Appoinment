@@ -7,7 +7,7 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   const authRes = await requireRole(request, "PATIENT");
-  if (authRes) return authRes;
+  if (authRes instanceof Response) return authRes;
 
   try {
     const appointment = await cancelAppointment(params.id);

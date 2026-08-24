@@ -65,11 +65,11 @@ export default async function AdminDashboardPage() {
             { label: "Active Patients", value: totalPatients },
             { label: "Cancelled This Week", value: cancelledThisWeek },
           ].map((stat) => (
-            <div key={stat.label} className="bg-white rounded-2xl border border-border p-5 shadow-sm">
+            <div key={stat.label} className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
               <p className="text-3xl font-semibold font-sora text-brand mb-1">
                 {stat.value}
               </p>
-              <p className="text-sm text-muted font-inter">
+              <p className="text-sm text-slate-500 font-inter">
                 {stat.label}
               </p>
             </div>
@@ -77,7 +77,7 @@ export default async function AdminDashboardPage() {
         </div>
 
         {/* Doctors Section */}
-        <div className="flex items-center justify-between border-b border-border pb-4 mb-6">
+        <div className="flex items-center justify-between border-b border-slate-200 pb-4 mb-6">
           <h2 className="text-xl font-bold font-sora text-slate-800">Doctors</h2>
           <Link href="/admin/doctors">
             <Button variant="default" className="bg-brand hover:bg-brand/90 text-white">
@@ -86,7 +86,7 @@ export default async function AdminDashboardPage() {
           </Link>
         </div>
         
-        <p className="text-sm text-muted font-inter">
+        <p className="text-sm text-slate-500 font-inter">
           Manage your hospital's doctors from the Doctors page.
         </p>
 

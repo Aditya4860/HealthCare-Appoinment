@@ -8,7 +8,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   const authRes = await requireRole(request, "PATIENT");
-  if (authRes) return authRes;
+  if (authRes instanceof Response) return authRes;
 
   const date = request.nextUrl.searchParams.get("date");
   if (!date) {

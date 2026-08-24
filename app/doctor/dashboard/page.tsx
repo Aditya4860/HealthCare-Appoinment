@@ -100,11 +100,11 @@ export default async function DoctorDashboardPage() {
             { label: "This Week", value: weekCount },
             { label: "Completed", value: completedCount },
           ].map((stat) => (
-            <div key={stat.label} className="bg-white rounded-2xl border border-border p-5 shadow-sm">
+            <div key={stat.label} className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
               <p className="text-3xl font-semibold font-sora text-brand mb-1">
                 {stat.value}
               </p>
-              <p className="text-sm text-muted font-inter">
+              <p className="text-sm text-slate-500 font-inter">
                 {stat.label}
               </p>
             </div>
@@ -120,12 +120,12 @@ export default async function DoctorDashboardPage() {
               <div className="space-y-4">
                 {timeline.map((slot, i) => (
                   <div key={i} className="flex">
-                    <div className="w-16 text-right pr-4 pt-4 text-sm text-muted font-inter font-medium flex-shrink-0">
+                    <div className="w-16 text-right pr-4 pt-4 text-sm text-slate-500 font-inter font-medium flex-shrink-0">
                       {slot.time}
                     </div>
                     <div className="flex-1 pb-4">
                       {slot.appointment ? (
-                        <div className="bg-white rounded-xl border-l-4 border-l-brand border border-border shadow-sm p-4 ml-4 hover:shadow-md transition-all">
+                        <div className="bg-white rounded-xl border-l-4 border-l-brand border border-slate-200 shadow-sm p-4 ml-4 hover:shadow-md transition-all">
                           <div className="flex justify-between items-start mb-2">
                             <span className="font-semibold font-inter text-slate-800">{slot.appointment.patient.name}</span>
                             <StatusBadge status={slot.appointment.status as any} />
@@ -136,7 +136,7 @@ export default async function DoctorDashboardPage() {
                               <span className={`text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded ${slot.appointment.urgencyLevel === "High" ? "bg-danger/10 text-danger" : "bg-warn/10 text-warn-700"}`}>
                                 {slot.appointment.urgencyLevel}
                               </span>
-                              <span className="text-sm text-muted font-inter truncate">{slot.appointment.chiefConcern}</span>
+                              <span className="text-sm text-slate-500 font-inter truncate">{slot.appointment.chiefConcern}</span>
                             </div>
                           )}
                           
@@ -147,7 +147,7 @@ export default async function DoctorDashboardPage() {
                           </div>
                         </div>
                       ) : (
-                        <div className="border-2 border-dashed border-border rounded-xl ml-4 p-3 text-xs text-muted font-inter flex items-center justify-center h-full bg-slate-50/50">
+                        <div className="border-2 border-dashed border-slate-200 rounded-xl ml-4 p-3 text-xs text-slate-500 font-inter flex items-center justify-center h-full bg-slate-50/50">
                           Available
                         </div>
                       )}
@@ -156,8 +156,8 @@ export default async function DoctorDashboardPage() {
                 ))}
               </div>
             ) : (
-              <div className="bg-white rounded-2xl border border-border p-10 text-center shadow-sm">
-                <p className="text-muted font-inter">You have no appointments today.</p>
+              <div className="bg-white rounded-2xl border border-slate-200 p-10 text-center shadow-sm">
+                <p className="text-slate-500 font-inter">You have no appointments today.</p>
               </div>
             )}
           </div>
@@ -171,19 +171,19 @@ export default async function DoctorDashboardPage() {
                   const dateStr = app.scheduledAt.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
                   const timeStr = app.scheduledAt.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
                   return (
-                    <Link key={app.id} href={`/doctor/appointments/${app.id}`} className="block bg-white rounded-xl border border-border p-4 shadow-sm hover:border-brand/30 transition-colors">
+                    <Link key={app.id} href={`/doctor/appointments/${app.id}`} className="block bg-white rounded-xl border border-slate-200 p-4 shadow-sm hover:border-brand/30 transition-colors">
                       <div className="flex justify-between items-start mb-1">
                         <span className="font-semibold font-inter text-slate-800 text-sm">{app.patient.name}</span>
                         <StatusBadge status={app.status as any} />
                       </div>
-                      <div className="text-xs text-muted font-inter">
+                      <div className="text-xs text-slate-500 font-inter">
                         {dateStr} &middot; {timeStr}
                       </div>
                     </Link>
                   )
                 })
               ) : (
-                <div className="bg-white rounded-xl border border-border p-6 text-center text-sm text-muted font-inter">
+                <div className="bg-white rounded-xl border border-slate-200 p-6 text-center text-sm text-slate-500 font-inter">
                   No upcoming appointments.
                 </div>
               )}

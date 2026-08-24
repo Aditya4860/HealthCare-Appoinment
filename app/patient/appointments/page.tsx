@@ -34,7 +34,7 @@ export default function AllAppointmentsPage() {
       <Navbar userName="Patient" role="PATIENT" />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Link href="/patient/dashboard" className="inline-flex items-center gap-1 text-sm text-muted hover:text-brand font-inter mb-6 transition-colors">
+        <Link href="/patient/dashboard" className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-brand font-inter mb-6 transition-colors">
           <ArrowLeft size={16} /> Back to Dashboard
         </Link>
         
@@ -45,8 +45,8 @@ export default function AllAppointmentsPage() {
             <Loader2 className="animate-spin text-brand" size={32} />
           </div>
         ) : appointments.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-border p-12 text-center shadow-sm">
-            <p className="text-muted font-inter mb-4">You have no appointments history.</p>
+          <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center shadow-sm">
+            <p className="text-slate-500 font-inter mb-4">You have no appointments history.</p>
             <Link href="/patient/book">
               <Button className="bg-brand hover:bg-brand/90 text-white font-inter rounded-xl">Book Appointment</Button>
             </Link>
@@ -58,7 +58,7 @@ export default function AllAppointmentsPage() {
               const timeStr = new Date(app.scheduledAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
               
               return (
-                <Link key={app.id} href={`/patient/appointments/${app.id}`} className="block bg-white rounded-2xl border border-border p-5 shadow-sm hover:border-brand/30 hover:shadow-md transition-all">
+                <Link key={app.id} href={`/patient/appointments/${app.id}`} className="block bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:border-brand/30 hover:shadow-md transition-all">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-full bg-brand/10 text-brand flex items-center justify-center font-bold text-lg flex-shrink-0">

@@ -162,7 +162,7 @@ export default function RegisterPage() {
           <h1 className="font-display text-2xl text-brand mb-1">
             Create your account
           </h1>
-          <p className="text-sm text-muted mb-8">
+          <p className="text-sm text-slate-500 mb-8">
             Join thousands of patients managing their health.
           </p>
 
@@ -234,7 +234,7 @@ export default function RegisterPage() {
                   id="register-toggle-password"
                   tabIndex={-1}
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500
                              hover:text-slate-600 transition-colors"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
@@ -296,11 +296,11 @@ export default function RegisterPage() {
           </form>
 
           {/* Note about doctors */}
-          <p className="text-xs text-muted text-center mt-4 bg-surface rounded-xl px-4 py-3">
+          <p className="text-xs text-slate-500 text-center mt-4 bg-surface rounded-xl px-4 py-3">
             🩺 Doctors are added by admin only.
           </p>
 
-          <p className="text-sm text-muted text-center mt-4">
+          <p className="text-sm text-slate-500 text-center mt-4">
             Already have an account?{" "}
             <Link
               href="/login"

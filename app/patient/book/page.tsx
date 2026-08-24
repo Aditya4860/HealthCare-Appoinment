@@ -168,7 +168,7 @@ export default function BookAppointmentPage() {
               const isCurrent = num === step;
               const isUpcoming = num > step;
               
-              let circleClass = "bg-gray-100 text-muted border-2 border-transparent";
+              let circleClass = "bg-gray-100 text-slate-500 border-2 border-transparent";
               if (isCompleted) circleClass = "bg-brand text-white border-2 border-brand";
               if (isCurrent) circleClass = "bg-white text-brand border-2 border-brand";
 
@@ -177,7 +177,7 @@ export default function BookAppointmentPage() {
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${circleClass} shadow-sm transition-all`}>
                     {isCompleted ? <CheckCircle2 size={16} /> : num}
                   </div>
-                  <span className={`text-xs font-medium font-inter ${isCurrent ? 'text-brand' : 'text-muted'}`}>
+                  <span className={`text-xs font-medium font-inter ${isCurrent ? 'text-brand' : 'text-slate-500'}`}>
                     {label}
                   </span>
                 </div>
@@ -216,7 +216,7 @@ export default function BookAppointmentPage() {
                   try { wh = JSON.parse(doc.doctorProfile?.workingHours || "{}") } catch {}
                   
                   return (
-                    <div key={doc.id} className="bg-white rounded-2xl border border-border p-5 hover:border-brand/50 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between"
+                    <div key={doc.id} className="bg-white rounded-2xl border border-slate-200 p-5 hover:border-brand/50 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between"
                          onClick={() => { setSelectedDoc(doc); setStep(2); }}>
                       <div className="flex items-start gap-4">
                         <div className="w-12 h-12 rounded-full bg-brand/10 text-brand flex items-center justify-center font-bold text-lg flex-shrink-0">
@@ -227,12 +227,12 @@ export default function BookAppointmentPage() {
                           <span className="inline-block bg-brand-light text-brand text-xs px-2 py-0.5 rounded-full font-inter font-medium mt-1 mb-2">
                             {sp}
                           </span>
-                          <p className="text-xs text-muted font-inter">
+                          <p className="text-xs text-slate-500 font-inter">
                             {duration} min slots &middot; {wh.start} - {wh.end}
                           </p>
                         </div>
                       </div>
-                      <div className="mt-4 flex justify-between items-center border-t border-border pt-4">
+                      <div className="mt-4 flex justify-between items-center border-t border-slate-200 pt-4">
                         <div className="flex items-center gap-1.5">
                            {/* Naive mock indicator */}
                            <span className="w-2 h-2 rounded-full bg-accent"></span>
@@ -253,29 +253,29 @@ export default function BookAppointmentPage() {
         {/* STEP 2 */}
         {step === 2 && selectedDoc && (
           <div className="animate-in fade-in slide-in-from-right-4 duration-500">
-            <button onClick={() => setStep(1)} className="inline-flex items-center gap-1 text-sm text-muted hover:text-brand font-inter mb-4">
+            <button onClick={() => setStep(1)} className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-brand font-inter mb-4">
               <ArrowLeft size={16} /> Back to doctors
             </button>
             <h1 className="font-sora text-2xl font-bold text-slate-800 mb-6">Choose a date and time</h1>
             
-            <div className="bg-white rounded-2xl border border-border p-4 mb-6 flex items-center gap-4">
+            <div className="bg-white rounded-2xl border border-slate-200 p-4 mb-6 flex items-center gap-4">
               <div className="w-10 h-10 rounded-full bg-brand/10 text-brand flex items-center justify-center font-bold">
                 {selectedDoc.name?.substring(0,2).toUpperCase() || "DR"}
               </div>
               <div>
                 <p className="font-medium font-inter text-sm text-slate-800">{selectedDoc.name}</p>
-                <p className="text-xs text-muted font-inter">{selectedDoc.doctorProfile?.specialisation}</p>
+                <p className="text-xs text-slate-500 font-inter">{selectedDoc.doctorProfile?.specialisation}</p>
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl border border-border p-6 shadow-sm">
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
               <label className="block text-sm font-medium text-slate-700 mb-2 font-inter">Select a date</label>
               <Input type="date" min={todayStr} value={selectedDate} onChange={e => setSelectedDate(e.target.value)}
                      className="max-w-xs h-11 rounded-xl focus-visible:ring-brand mb-6" />
 
               {selectedDate && (
                 <div>
-                  <p className="text-sm text-muted font-inter mb-4">Available slots for {new Date(selectedDate).toLocaleDateString()}</p>
+                  <p className="text-sm text-slate-500 font-inter mb-4">Available slots for {new Date(selectedDate).toLocaleDateString()}</p>
                   
                   {loadingSlots ? (
                     <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
@@ -286,7 +286,7 @@ export default function BookAppointmentPage() {
                       Doctor is on leave this day. Please choose another date.
                     </div>
                   ) : slots.length === 0 ? (
-                    <div className="text-sm text-muted font-inter italic">No slots available on this date.</div>
+                    <div className="text-sm text-slate-500 font-inter italic">No slots available on this date.</div>
                   ) : (
                     <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                       {slots.map(time => {
@@ -322,7 +322,7 @@ export default function BookAppointmentPage() {
         {/* STEP 3 */}
         {step === 3 && selectedDoc && (
           <div className="animate-in fade-in slide-in-from-right-4 duration-500">
-            <button onClick={() => setStep(2)} className="inline-flex items-center gap-1 text-sm text-muted hover:text-brand font-inter mb-4">
+            <button onClick={() => setStep(2)} className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-brand font-inter mb-4">
               <ArrowLeft size={16} /> Back to slots
             </button>
             <h1 className="font-sora text-2xl font-bold text-slate-800 mb-6">What brings you in?</h1>
@@ -339,20 +339,20 @@ export default function BookAppointmentPage() {
               </Button>
             </div>
 
-            <div className="bg-white rounded-2xl border border-border p-6 shadow-sm">
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
               <label className="block text-sm font-medium text-slate-700 mb-2 font-inter">Describe your symptoms</label>
               <Textarea 
                 placeholder="e.g. I've been experiencing chest pain for 3 days, especially when breathing deeply..."
                 rows={5}
                 value={symptoms}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setSymptoms(e.target.value)}
-                className="rounded-xl border-border focus-visible:ring-brand resize-none font-inter"
+                className="rounded-xl border-slate-200 focus-visible:ring-brand resize-none font-inter"
               />
               <div className="flex justify-between mt-2">
-                <p className="text-xs text-muted italic font-inter">
+                <p className="text-xs text-slate-500 italic font-inter">
                   This helps your doctor prepare before your visit. An AI summary will be generated for them.
                 </p>
-                <span className={`text-xs font-inter ${symptoms.length < 20 ? 'text-danger' : 'text-muted'}`}>
+                <span className={`text-xs font-inter ${symptoms.length < 20 ? 'text-danger' : 'text-slate-500'}`}>
                   {symptoms.length} / 500
                 </span>
               </div>
@@ -377,14 +377,14 @@ export default function BookAppointmentPage() {
         {step === 4 && selectedDoc && (
           <div className="animate-in fade-in zoom-in-95 duration-500 max-w-lg mx-auto text-center pt-8">
             <h1 className="font-sora text-3xl font-bold text-slate-800 mb-2">Review & Confirm</h1>
-            <p className="text-sm text-muted font-inter mb-8">Please confirm your appointment details below.</p>
+            <p className="text-sm text-slate-500 font-inter mb-8">Please confirm your appointment details below.</p>
             
             <div className="mb-8 flex flex-col items-center">
               <p className="text-sm font-medium text-slate-600 mb-2 font-inter">Your slot is held for</p>
               <div className={`font-sora text-4xl font-bold tabular-nums transition-colors duration-300 ${timeLeft < 60 ? 'text-danger animate-pulse' : 'text-brand'}`}>
                 {formatTime(timeLeft)}
               </div>
-              <p className="text-xs text-muted font-inter mt-2">Complete booking before it expires</p>
+              <p className="text-xs text-slate-500 font-inter mt-2">Complete booking before it expires</p>
             </div>
 
             <div className="bg-brand-light rounded-2xl p-6 text-left border border-brand/10 mb-8">
@@ -392,19 +392,19 @@ export default function BookAppointmentPage() {
               
               <div className="space-y-3 font-inter text-sm">
                 <div className="flex justify-between border-b border-brand/10 pb-2">
-                  <span className="text-muted">Doctor</span>
+                  <span className="text-slate-500">Doctor</span>
                   <span className="font-semibold text-slate-800">{selectedDoc.name}</span>
                 </div>
                 <div className="flex justify-between border-b border-brand/10 pb-2">
-                  <span className="text-muted">Specialisation</span>
+                  <span className="text-slate-500">Specialisation</span>
                   <span className="font-semibold text-slate-800">{selectedDoc.doctorProfile?.specialisation}</span>
                 </div>
                 <div className="flex justify-between border-b border-brand/10 pb-2">
-                  <span className="text-muted">Date</span>
+                  <span className="text-slate-500">Date</span>
                   <span className="font-semibold text-slate-800">{new Date(selectedDate).toLocaleDateString()}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted">Time</span>
+                  <span className="text-slate-500">Time</span>
                   <span className="font-semibold text-slate-800">{selectedTime}</span>
                 </div>
               </div>

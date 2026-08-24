@@ -119,7 +119,7 @@ export default function AdminDoctorsPage() {
       <Navbar userName="Admin" role="ADMIN" />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex items-center justify-between mb-8 border-b border-border pb-4">
+        <div className="flex items-center justify-between mb-8 border-b border-slate-200 pb-4">
           <h1 className="text-2xl font-bold font-sora text-brand">Doctors</h1>
           
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -237,7 +237,7 @@ export default function AdminDoctorsPage() {
               const initials = doc.name?.substring(0,2).toUpperCase() || "DR";
 
               return (
-                <div key={doc.id} className="bg-white rounded-2xl border border-border p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm hover:border-brand/30 transition-colors">
+                <div key={doc.id} className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm hover:border-brand/30 transition-colors">
                   <div className="flex items-center gap-4">
                     {/* Avatar circle */}
                     <div className="w-12 h-12 bg-brand/10 text-brand rounded-full flex items-center justify-center flex-shrink-0 text-lg font-semibold font-inter">
@@ -250,7 +250,7 @@ export default function AdminDoctorsPage() {
                           {profile?.specialisation || "General"}
                         </span>
                       </div>
-                      <p className="text-xs text-muted font-inter">
+                      <p className="text-xs text-slate-500 font-inter">
                         Slots: {profile?.slotDuration} min &middot; {workingHours.start}&ndash;{workingHours.end}
                       </p>
                     </div>
@@ -274,7 +274,7 @@ export default function AdminDoctorsPage() {
             })}
             
             {doctors.length === 0 && !isOpen && (
-              <div className="py-16 text-center text-muted font-inter">
+              <div className="py-16 text-center text-slate-500 font-inter">
                 <p>No doctors found in the system.</p>
               </div>
             )}

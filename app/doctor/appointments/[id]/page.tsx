@@ -95,7 +95,7 @@ export default function DoctorAppointmentDetailPage() {
       <Navbar userName="Doctor" role="DOCTOR" />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Link href="/doctor/dashboard" className="inline-flex items-center gap-1 text-sm text-muted hover:text-brand font-inter mb-6 transition-colors">
+        <Link href="/doctor/dashboard" className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-brand font-inter mb-6 transition-colors">
           <ArrowLeft size={16} /> Schedule
         </Link>
 
@@ -105,12 +105,12 @@ export default function DoctorAppointmentDetailPage() {
           <div className="space-y-6">
             
             {/* Patient Info Card */}
-            <div className="bg-white rounded-2xl border border-border p-6 shadow-sm flex items-center gap-5">
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex items-center gap-5">
               <div className="w-16 h-16 rounded-full bg-brand/10 text-brand flex items-center justify-center font-bold text-2xl flex-shrink-0">
                 {appointment.patient.name?.substring(0,2).toUpperCase() || "PT"}
               </div>
               <div>
-                <span className="text-xs text-muted font-inter uppercase tracking-wider font-semibold">Patient</span>
+                <span className="text-xs text-slate-500 font-inter uppercase tracking-wider font-semibold">Patient</span>
                 <h1 className="font-sora text-xl font-bold text-slate-800">{appointment.patient.name}</h1>
                 <div className="flex items-center gap-3 mt-1 text-sm text-slate-600 font-inter">
                   <span>{dateStr} &middot; {timeStr}</span>
@@ -154,20 +154,20 @@ export default function DoctorAppointmentDetailPage() {
                   )}
                   
                   <div className="pt-2 border-t border-brand/10">
-                    <p className="text-xs text-muted italic font-inter">
+                    <p className="text-xs text-slate-500 italic font-inter">
                       Generated from patient symptoms &middot; Verify clinically
                     </p>
                   </div>
                 </div>
               ) : (
-                <p className="text-sm text-muted font-inter text-center py-4">AI summary not available</p>
+                <p className="text-sm text-slate-500 font-inter text-center py-4">AI summary not available</p>
               )}
             </div>
 
             {/* Patient Symptoms Card */}
             {appointment.symptoms && (
               <div>
-                <span className="block text-sm font-medium text-muted mb-2 font-inter">Patient reported symptoms</span>
+                <span className="block text-sm font-medium text-slate-500 mb-2 font-inter">Patient reported symptoms</span>
                 <div className="bg-gray-50 rounded-xl p-4 text-sm text-slate-700 font-inter border border-slate-100">
                   {appointment.symptoms}
                 </div>
@@ -180,7 +180,7 @@ export default function DoctorAppointmentDetailPage() {
           <div className="space-y-6">
             
             {appointment.status === "CONFIRMED" && (
-              <div className="bg-white rounded-2xl border border-border p-6 shadow-sm">
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
                 <h2 className="text-lg font-bold font-sora text-slate-800 mb-6">Complete This Visit</h2>
                 
                 <div className="space-y-5">
@@ -192,7 +192,7 @@ export default function DoctorAppointmentDetailPage() {
                       required
                       value={notes}
                       onChange={(e: any) => setNotes(e.target.value)}
-                      className="rounded-xl border-border focus-visible:ring-brand resize-none font-inter"
+                      className="rounded-xl border-slate-200 focus-visible:ring-brand resize-none font-inter"
                     />
                   </div>
                   
@@ -203,9 +203,9 @@ export default function DoctorAppointmentDetailPage() {
                       rows={4}
                       value={prescription}
                       onChange={(e: any) => setPrescription(e.target.value)}
-                      className="rounded-xl border-border focus-visible:ring-brand resize-none font-inter"
+                      className="rounded-xl border-slate-200 focus-visible:ring-brand resize-none font-inter"
                     />
-                    <p className="text-xs text-muted font-inter">
+                    <p className="text-xs text-slate-500 font-inter">
                       Each line = one medication. AI will format into patient instructions.
                     </p>
                   </div>
@@ -229,7 +229,7 @@ export default function DoctorAppointmentDetailPage() {
                   <CheckCircle2 className="text-accent" size={20} />
                   <h2 className="text-lg font-bold font-sora text-accent">Visit completed</h2>
                 </div>
-                <p className="text-sm text-muted font-inter mb-6">Post-visit summary generated for patient</p>
+                <p className="text-sm text-slate-500 font-inter mb-6">Post-visit summary generated for patient</p>
                 
                 <div className="space-y-5">
                   <div>
@@ -242,9 +242,9 @@ export default function DoctorAppointmentDetailPage() {
                   {medsArr.length > 0 && (
                     <div>
                       <span className="block text-sm font-medium text-slate-700 mb-2 font-inter">Medication Schedule</span>
-                      <div className="bg-white rounded-xl border border-border overflow-hidden">
+                      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
                         <table className="w-full text-left font-inter">
-                          <thead className="bg-gray-50 border-b border-border text-xs font-medium text-muted uppercase tracking-wider">
+                          <thead className="bg-gray-50 border-b border-slate-200 text-xs font-medium text-slate-500 uppercase tracking-wider">
                             <tr>
                               <th className="px-4 py-3">Medicine</th>
                               <th className="px-4 py-3">Dose</th>
@@ -256,7 +256,7 @@ export default function DoctorAppointmentDetailPage() {
                               <tr key={i}>
                                 <td className="px-4 py-3 font-medium">{med.medicine}</td>
                                 <td className="px-4 py-3">{med.dose}</td>
-                                <td className="px-4 py-3 text-muted">{med.frequency}</td>
+                                <td className="px-4 py-3 text-slate-500">{med.frequency}</td>
                               </tr>
                             ))}
                           </tbody>

@@ -1,281 +1,234 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import Link from "next/link";
-import {
-  Eye,
-  EyeOff,
-  Loader2,
-  Stethoscope,
-  CalendarCheck,
-  Sparkles,
-} from "lucide-react";
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Loader2, Eye, EyeOff, User, Stethoscope, Settings, ChevronRight, ArrowLeft } from 'lucide-react'
+import { toast } from 'sonner'
 
-// ── Illustration stat card ────────────────────────────────────────────────────
-function StatCard({
-  icon,
-  iconBg,
-  iconColor,
-  text,
-  offset = 0,
-}: {
-  icon: React.ReactNode;
-  iconBg: string;
-  iconColor: string;
-  text: React.ReactNode;
-  offset?: number;
-}) {
-  return (
-    <div
-      className="bg-white rounded-2xl px-5 py-4 shadow-xl shadow-brand/25 flex items-center gap-3"
-      style={{ marginLeft: `${offset}px` }}
-    >
-      <div
-        className={`w-9 h-9 ${iconBg} rounded-xl flex items-center justify-center flex-shrink-0`}
-      >
-        <span className={iconColor}>{icon}</span>
-      </div>
-      <p className="text-[13px] font-medium text-slate-700 leading-snug">
-        {text}
-      </p>
-    </div>
-  );
-}
-
-// ── Page ──────────────────────────────────────────────────────────────────────
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const roleParam = searchParams.get('role')
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setIsLoading(true);
-    setError("");
+  const [step, setStep] = useState<1 | 2>(1)
+  const [selectedRole, setSelectedRole] = useState<'patient' | 'doctor' | 'admin' | null>(null)
+  
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [isDemoFilled, setIsDemoFilled] = useState(false)
+
+  // Initialize from URL param if present
+  useEffect(() => {
+    if (roleParam && ['patient', 'doctor', 'admin'].includes(roleParam.toLowerCase())) {
+      handleSelectRole(roleParam.toLowerCase() as any)
+    }
+  }, [roleParam])
+
+  const handleSelectRole = (role: 'patient' | 'doctor' | 'admin') => {
+    setSelectedRole(role)
+    setStep(2)
+    
+    // Auto-fill demo credentials
+    if (role === 'patient') {
+      setEmail('patient@test.com')
+      setPassword('Patient123!')
+    } else if (role === 'doctor') {
+      setEmail('doctor@test.com')
+      setPassword('Doctor123!')
+    } else if (role === 'admin') {
+      setEmail('admin@test.com')
+      setPassword('Admin123!')
+    }
+    setIsDemoFilled(true)
+  }
+
+  const handleClearDemo = () => {
+    setEmail('')
+    setPassword('')
+    setIsDemoFilled(false)
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
 
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
+      })
+      const data = await res.json()
 
       if (!res.ok) {
-        setError(data.error ?? "Invalid email or password");
-        return;
-      }
-
-      // Use window.location.href (full reload) so middleware re-reads the new
-      // cookie before serving the protected dashboard page.
-      const role = data.user?.role;
-      if (role === "ADMIN") {
-        window.location.href = "/admin/dashboard";
-      } else if (role === "DOCTOR") {
-        window.location.href = "/doctor/dashboard";
+        toast.error(data.error || 'Login failed')
       } else {
-        window.location.href = "/patient/dashboard";
+        toast.success('Login successful!')
+        // Use window.location.href to trigger a full page load so middleware cookies sync properly
+        if (data.user.role === 'ADMIN') {
+          window.location.href = '/admin/dashboard'
+        } else if (data.user.role === 'DOCTOR') {
+          window.location.href = '/doctor/dashboard'
+        } else {
+          window.location.href = '/patient/dashboard'
+        }
       }
-    } catch {
-      setError("Something went wrong. Please try again.");
+    } catch (err) {
+      toast.error('An unexpected error occurred')
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
   }
 
   return (
     <div className="min-h-screen flex">
-      {/* ── Left panel (desktop only) ──────────────────────────────────────── */}
-      <div className="hidden lg:flex lg:w-[52%] bg-brand flex-col p-10 relative overflow-hidden">
-        {/* Decorative blobs */}
-        <div className="absolute -top-28 -right-28 w-[26rem] h-[26rem] rounded-full bg-white/5" />
-        <div className="absolute -bottom-36 -left-20 w-80 h-80 rounded-full bg-white/5" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full border border-white/5" />
-
-        {/* Logo */}
-        <div className="relative z-10">
-          <span className="font-display text-2xl font-bold text-white tracking-tight">
-            MediBook
-          </span>
-        </div>
-
-        {/* Stat cards illustration */}
-        <div className="flex-1 flex items-center justify-center relative z-10">
-          <div className="space-y-3.5 w-[280px]">
-            <StatCard
-              icon={<Stethoscope size={16} />}
-              iconBg="bg-brand-light"
-              iconColor="text-brand"
-              text={
-                <>
-                  <span className="text-brand font-semibold">127 Doctors</span>
-                  {" · 4 Specialisations"}
-                </>
-              }
-              offset={0}
-            />
-            <StatCard
-              icon={<CalendarCheck size={16} />}
-              iconBg="bg-accent/15"
-              iconColor="text-accent"
-              text="12 Appointments today"
-              offset={28}
-            />
-            <StatCard
-              icon={<Sparkles size={16} />}
-              iconBg="bg-warn/15"
-              iconColor="text-warn"
-              text="AI-powered pre-visit summaries"
-              offset={14}
-            />
-          </div>
-        </div>
-
-        {/* Tagline */}
-        <p className="relative z-10 text-white/70 text-sm">
-          Healthcare appointments, simplified.
+      {/* Left Panel: Branding */}
+      <div className="hidden lg:flex w-1/2 bg-brand text-white flex-col justify-center px-20">
+        <h1 className="font-sora text-5xl font-bold mb-6">MediBook</h1>
+        <p className="font-inter text-xl text-brand-light leading-relaxed">
+          The all-in-one platform for modern healthcare management.
         </p>
       </div>
 
-      {/* ── Right panel — form ─────────────────────────────────────────────── */}
-      <div className="w-full lg:w-[48%] flex items-center justify-center bg-white px-8 py-12">
-        <div className="w-full max-w-sm">
-          {/* Mobile logo */}
-          <p className="lg:hidden font-display text-xl font-bold text-brand mb-8">
-            MediBook
-          </p>
+      {/* Right Panel: Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-surface">
+        <div className="w-full max-w-md">
+          
+          {step === 1 && (
+            <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+              <h2 className="font-sora text-2xl font-bold text-brand mb-2">Sign in as...</h2>
+              <p className="font-inter text-sm text-slate-500 mb-8">Choose your role to continue</p>
+              
+              <div className="space-y-3">
+                <button onClick={() => handleSelectRole('patient')} className="w-full flex items-center p-4 rounded-xl border-2 border-slate-200 hover:border-brand hover:bg-brand-light cursor-pointer transition-all text-left group bg-white">
+                  <div className="w-12 h-12 rounded-full bg-accent/10 text-accent flex items-center justify-center mr-4 group-hover:scale-105 transition-transform">
+                    <User size={24} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-inter font-semibold text-slate-800">Patient</p>
+                    <p className="font-inter text-sm text-slate-500">Book and manage appointments</p>
+                  </div>
+                  <ChevronRight className="text-slate-400 group-hover:text-brand transition-colors" />
+                </button>
 
-          <h1 className="font-display text-2xl text-brand mb-1">
-            Welcome back
-          </h1>
-          <p className="text-sm text-muted mb-8">Sign in to your account</p>
+                <button onClick={() => handleSelectRole('doctor')} className="w-full flex items-center p-4 rounded-xl border-2 border-slate-200 hover:border-brand hover:bg-brand-light cursor-pointer transition-all text-left group bg-white">
+                  <div className="w-12 h-12 rounded-full bg-warn/10 text-warn-700 flex items-center justify-center mr-4 group-hover:scale-105 transition-transform">
+                    <Stethoscope size={24} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-inter font-semibold text-slate-800">Doctor</p>
+                    <p className="font-inter text-sm text-slate-500">View schedule and patient summaries</p>
+                  </div>
+                  <ChevronRight className="text-slate-400 group-hover:text-brand transition-colors" />
+                </button>
 
-          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-            {/* Email */}
-            <div>
-              <label
-                htmlFor="login-email"
-                className="block text-sm font-medium text-slate-700 mb-1.5"
-              >
-                Email address
-              </label>
-              <input
-                id="login-email"
-                type="email"
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                required
-                disabled={isLoading}
-                className="input-base w-full disabled:opacity-60"
-              />
-            </div>
-
-            {/* Password */}
-            <div>
-              <label
-                htmlFor="login-password"
-                className="block text-sm font-medium text-slate-700 mb-1.5"
-              >
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  id="login-password"
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  disabled={isLoading}
-                  className="input-base w-full pr-11 disabled:opacity-60"
-                />
-                <button
-                  type="button"
-                  id="login-toggle-password"
-                  tabIndex={-1}
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted
-                             hover:text-slate-600 transition-colors"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? (
-                    <EyeOff size={18} />
-                  ) : (
-                    <Eye size={18} />
-                  )}
+                <button onClick={() => handleSelectRole('admin')} className="w-full flex items-center p-4 rounded-xl border-2 border-slate-200 hover:border-brand hover:bg-brand-light cursor-pointer transition-all text-left group bg-white">
+                  <div className="w-12 h-12 rounded-full bg-brand/10 text-brand flex items-center justify-center mr-4 group-hover:scale-105 transition-transform">
+                    <Settings size={24} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-inter font-semibold text-slate-800">Administrator</p>
+                    <p className="font-inter text-sm text-slate-500">Manage doctors and clinic settings</p>
+                  </div>
+                  <ChevronRight className="text-slate-400 group-hover:text-brand transition-colors" />
                 </button>
               </div>
-            </div>
-
-            {/* Submit */}
-            <button
-              id="login-submit-btn"
-              type="submit"
-              disabled={isLoading}
-              className="btn-primary w-full h-11 flex items-center justify-center gap-2 mt-2"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" />
-                  Signing in…
-                </>
-              ) : (
-                "Sign in"
-              )}
-            </button>
-
-            {/* Error banner */}
-            {error && (
-              <div
-                role="alert"
-                className="bg-danger/8 border border-danger/20 text-danger text-sm
-                           px-4 py-3 rounded-xl leading-relaxed mt-2"
-              >
-                {error}
+              
+              <div className="mt-8 text-center text-sm font-inter">
+                Don't have an account?{' '}
+                <Link href="/register" className="text-brand font-medium hover:underline">
+                  Sign up
+                </Link>
               </div>
-            )}
-            
-            {/* Demo accounts */}
-            <div>
-              <p className="text-xs text-muted text-center mt-4 mb-2">Demo accounts</p>
-              <div className="flex flex-col gap-1">
-                {[
-                  { label: 'Admin', email: 'admin@test.com', password: 'Admin123!' },
-                  { label: 'Doctor', email: 'doctor@test.com', password: 'Doctor123!' },
-                  { label: 'Patient', email: 'patient@test.com', password: 'Patient123!' },
-                ].map((account) => (
-                  <button
-                    key={account.label}
-                    type="button"
-                    onClick={() => { setEmail(account.email); setPassword(account.password) }}
-                    className="text-xs text-brand hover:underline text-left px-2 py-1 
-                               rounded hover:bg-brand-light transition-colors"
-                  >
-                    <span className="font-medium">{account.label}:</span> {account.email}
+            </div>
+          )}
+
+          {step === 2 && selectedRole && (
+            <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+              <button onClick={() => setStep(1)} className="text-sm font-inter text-slate-500 hover:text-brand flex items-center gap-1.5 mb-8 transition-colors">
+                <ArrowLeft size={16} /> Choose different role
+              </button>
+              
+              <div className="mb-8">
+                <div className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full mb-3 uppercase tracking-wider
+                  ${selectedRole === 'patient' ? 'bg-accent/10 text-accent' : 
+                    selectedRole === 'doctor' ? 'bg-warn/10 text-warn-700' : 
+                    'bg-brand/10 text-brand'}`}>
+                  {selectedRole === 'patient' && <User size={14} />}
+                  {selectedRole === 'doctor' && <Stethoscope size={14} />}
+                  {selectedRole === 'admin' && <Settings size={14} />}
+                  {selectedRole}
+                </div>
+                
+                <h2 className="font-sora text-3xl font-bold text-gray-900">
+                  Welcome back
+                </h2>
+              </div>
+
+              {isDemoFilled && (
+                <div className="bg-brand/5 border border-brand/10 rounded-xl p-3 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <p className="text-xs text-slate-600 font-inter">
+                    <span className="font-semibold text-brand">Demo account pre-filled.</span> Click Sign in to continue.
+                  </p>
+                  <button onClick={handleClearDemo} className="text-xs text-brand hover:underline font-medium whitespace-nowrap">
+                    Use different credentials
                   </button>
-                ))}
-              </div>
-              <p className="text-xs text-muted text-center mt-2">Click any account to auto-fill</p>
-            </div>
-          </form>
+                </div>
+              )}
 
-          <p className="text-sm text-muted text-center mt-7">
-            New patient?{" "}
-            <Link
-              href="/register"
-              className="text-brand font-medium hover:underline underline-offset-2"
-            >
-              Create an account →
-            </Link>
-          </p>
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="font-inter text-slate-700">Email Address</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="font-inter bg-white"
+                  />
+                </div>
+                
+                <div className="space-y-2 relative">
+                  <Label htmlFor="password" className="font-inter text-slate-700">Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="font-inter pr-10 bg-white"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                </div>
+                
+                <Button 
+                  type="submit" 
+                  disabled={isLoading}
+                  className="w-full bg-brand hover:bg-brand/90 text-white font-inter h-12 rounded-xl text-base mt-2 transition-all"
+                >
+                  {isLoading ? <Loader2 className="animate-spin mr-2" size={20} /> : 'Sign in'}
+                </Button>
+              </form>
+            </div>
+          )}
+
         </div>
       </div>
     </div>
-  );
+  )
 }
