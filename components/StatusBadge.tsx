@@ -11,14 +11,14 @@ export type AppointmentStatus = "CONFIRMED" | "HOLD" | "CANCELLED" | "COMPLETED"
 
 const STATUS_CLASSES: Record<AppointmentStatus, string> = {
   CONFIRMED: "bg-accent/10 text-accent border border-accent/20",
-  HOLD:      "bg-warn/10   text-warn   border border-warn/20",
+  HOLD: "bg-warn/10   text-warn   border border-warn/20",
   CANCELLED: "bg-danger/10 text-danger border border-danger/20",
   COMPLETED: "bg-brand/10  text-brand  border border-brand/20",
 };
 
 const STATUS_LABEL: Record<AppointmentStatus, string> = {
   CONFIRMED: "Confirmed",
-  HOLD:      "Hold",
+  HOLD: "Hold",
   CANCELLED: "Cancelled",
   COMPLETED: "Completed",
 };
@@ -45,9 +45,9 @@ export function StatusBadge({ status, className = "" }: StatusBadgeProps) {
 export type UrgencyLevel = "High" | "Medium" | "Low";
 
 const URGENCY_CLASSES: Record<UrgencyLevel, string> = {
-  High:   "bg-danger text-white",
+  High: "bg-danger text-white",
   Medium: "bg-warn   text-white",
-  Low:    "bg-accent text-white",
+  Low: "bg-accent text-white",
 };
 
 interface UrgencyBadgeProps {

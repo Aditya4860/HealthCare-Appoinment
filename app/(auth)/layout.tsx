@@ -1,6 +1,13 @@
+/**
+ * (auth) group layout — Server Component.
+ *
+ * Redirects already-authenticated users to their dashboard,
+ * so visiting /login or /register while logged-in sends you straight home.
+ */
+
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { verifyToken } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 const REDIRECT_MAP: Record<string, string> = {
   PATIENT: "/patient/dashboard",
@@ -8,11 +15,11 @@ const REDIRECT_MAP: Record<string, string> = {
   ADMIN: "/admin/dashboard",
 };
 
-/**
- * Root page: redirects authenticated users to their dashboard,
- * everyone else to /login.
- */
-export default async function RootPage() {
+export default async function AuthLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const cookieStore = cookies();
   const token = cookieStore.get("token")?.value;
 
@@ -23,5 +30,5 @@ export default async function RootPage() {
     }
   }
 
-  redirect("/login");
+  return <>{children}</>;
 }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
 export type UserRole = "ADMIN" | "DOCTOR" | "PATIENT";
@@ -9,13 +10,12 @@ export type UserRole = "ADMIN" | "DOCTOR" | "PATIENT";
 interface NavbarProps {
   userName: string;
   role: UserRole;
-  onLogout: () => void;
 }
 
 const ROLE_PILL: Record<UserRole, string> = {
-  PATIENT: "bg-accent/20 text-accent",
-  DOCTOR:  "bg-warn/20  text-warn",
-  ADMIN:   "bg-brand-light text-brand",
+  PATIENT: "bg-accent/30 text-white",
+  DOCTOR:  "bg-warn/30  text-white",
+  ADMIN:   "bg-white/20 text-white",
 };
 
 const ROLE_LABEL: Record<UserRole, string> = {
@@ -25,11 +25,22 @@ const ROLE_LABEL: Record<UserRole, string> = {
 };
 
 /**
- * Shared authenticated navbar — sticky, brand blue, 64px tall.
- * Collapses to a hamburger on mobile.
+ * Shared navbar for all authenticated pages.
+ * h-16, sticky, bg-brand, with user name, role pill, divider, and Sign out.
  */
-export function Navbar({ userName, role, onLogout }: NavbarProps) {
+export function Navbar({ userName, role }: NavbarProps) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
+
+  async function handleSignOut() {
+    setSigningOut(true);
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } finally {
+      router.push("/login");
+    }
+  }
 
   return (
     <nav className="h-16 bg-brand sticky top-0 z-50 shadow-md">
@@ -37,28 +48,36 @@ export function Navbar({ userName, role, onLogout }: NavbarProps) {
         {/* ── Logo ─────────────────────────────────────────────────────── */}
         <Link
           href="/"
-          className="font-display text-xl font-bold text-white tracking-tight hover:opacity-90 transition-opacity"
+          className="font-display text-xl font-bold text-white tracking-tight
+                     hover:opacity-90 transition-opacity"
         >
           MediBook
         </Link>
 
-        {/* ── Desktop right ────────────────────────────────────────────── */}
-        <div className="hidden md:flex items-center gap-4">
-          <span className="text-white text-sm font-medium">{userName}</span>
+        {/* ── Desktop right ─────────────────────────────────────────────── */}
+        <div className="hidden md:flex items-center gap-3">
+          {/* User name */}
+          <span className="text-white/90 text-sm font-medium">{userName}</span>
 
+          {/* Role badge */}
           <span
-            className={`${ROLE_PILL[role]} text-xs font-semibold px-3 py-1 rounded-full`}
+            className={`${ROLE_PILL[role]} text-xs font-semibold px-2 py-0.5 rounded-full`}
           >
             {ROLE_LABEL[role]}
           </span>
 
+          {/* Divider */}
+          <div className="w-px h-5 bg-white/20 mx-1" aria-hidden />
+
+          {/* Sign out */}
           <button
-            id="navbar-logout-btn"
-            onClick={onLogout}
-            className="border border-white/40 text-white text-sm font-medium rounded-xl px-5 py-2
-                       hover:bg-white/10 transition-colors duration-150"
+            id="navbar-signout-btn"
+            onClick={handleSignOut}
+            disabled={signingOut}
+            className="text-white/70 hover:text-white text-sm transition-colors
+                       disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Logout
+            {signingOut ? "Signing out…" : "Sign out"}
           </button>
         </div>
 
@@ -73,14 +92,16 @@ export function Navbar({ userName, role, onLogout }: NavbarProps) {
         </button>
       </div>
 
-      {/* ── Mobile dropdown ──────────────────────────────────────────────── */}
+      {/* ── Mobile dropdown ─────────────────────────────────────────────── */}
       {open && (
         <div className="md:hidden absolute top-16 left-0 right-0 bg-brand border-t border-white/10 z-40">
           <div className="content-wrapper py-4 flex flex-col gap-3">
             <div className="flex items-center gap-3">
-              <span className="text-white text-sm font-medium">{userName}</span>
+              <span className="text-white/90 text-sm font-medium">
+                {userName}
+              </span>
               <span
-                className={`${ROLE_PILL[role]} text-xs font-semibold px-3 py-1 rounded-full`}
+                className={`${ROLE_PILL[role]} text-xs font-semibold px-2 py-0.5 rounded-full`}
               >
                 {ROLE_LABEL[role]}
               </span>
@@ -89,12 +110,13 @@ export function Navbar({ userName, role, onLogout }: NavbarProps) {
             <button
               onClick={() => {
                 setOpen(false);
-                onLogout();
+                handleSignOut();
               }}
-              className="border border-white/40 text-white text-sm font-medium rounded-xl px-5 py-2.5
-                         hover:bg-white/10 transition-colors duration-150 text-left w-full"
+              disabled={signingOut}
+              className="text-white/70 hover:text-white text-sm text-left
+                         transition-colors disabled:opacity-50"
             >
-              Logout
+              {signingOut ? "Signing out…" : "Sign out"}
             </button>
           </div>
         </div>
