@@ -44,9 +44,9 @@ export default function LoginPage() {
   }
 
   const handleFillDemo = (role: 'patient' | 'doctor' | 'admin') => {
-    if (role === 'patient') { setEmail('patient@test.com'); setPassword('Patient123!') }
-    else if (role === 'doctor') { setEmail('doctor@test.com'); setPassword('Doctor123!') }
-    else { setEmail('admin@test.com'); setPassword('Admin123!') }
+    if (role === 'patient') { setEmail('patient@medibook.com'); setPassword('MediBook2026!') }
+    else if (role === 'doctor') { setEmail('sarah@medibook.com'); setPassword('MediBook2026!') }
+    else { setEmail('admin@medibook.com'); setPassword('MediBook2026!') }
     setIsDemoFilled(true)
     setShowDemo(false)
   }
