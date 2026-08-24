@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
+import { formatIST } from "@/lib/timezone";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -80,12 +81,21 @@ export default function AppointmentDetailPage() {
 
   if (!appointment) return null;
 
-  const dateStr = new Date(appointment.scheduledAt).toLocaleDateString("en-US", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
-  const timeStr = new Date(appointment.scheduledAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+  const dateStr = formatIST(appointment.scheduledAt, "EEEE, MMMM d, yyyy");
+  const timeStr = formatIST(appointment.scheduledAt, "hh:mm a 'IST'");
 
   let aiQuestionsArr: string[] = [];
   if (appointment.aiQuestions) {
-    aiQuestionsArr = appointment.aiQuestions.split("\n").filter((q: string) => q.trim().length > 0);
+    try {
+      const parsed = JSON.parse(appointment.aiQuestions);
+      if (Array.isArray(parsed)) {
+        aiQuestionsArr = parsed;
+      } else {
+        aiQuestionsArr = appointment.aiQuestions.split("\n").filter((q: string) => q.trim().length > 0);
+      }
+    } catch (e) {
+      aiQuestionsArr = appointment.aiQuestions.split("\n").filter((q: string) => q.trim().length > 0);
+    }
   }
 
   return (

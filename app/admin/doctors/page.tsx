@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/Navbar";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus, Search, Calendar as CalIcon, User, Settings, ArrowLeft } from "lucide-react";
+import { formatIST } from "@/lib/timezone";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -109,7 +110,7 @@ export default function AdminDoctorsPage() {
     if (upcoming.length > 0) {
       // Sort by closest date
       upcoming.sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-      return new Date(upcoming[0].date).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+      return formatIST(new Date(upcoming[0].date), "EEE, d MMM");
     }
     return null;
   };
@@ -119,6 +120,10 @@ export default function AdminDoctorsPage() {
       <Navbar userName="Admin" role="ADMIN" />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <Link href="/admin/dashboard" className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors mb-6 text-sm font-inter">
+          <ArrowLeft size={16} /> Back to Dashboard
+        </Link>
+        
         <div className="flex items-center justify-between mb-8 border-b border-slate-200 pb-4">
           <h1 className="text-2xl font-bold font-sora text-brand">Doctors</h1>
           
@@ -237,35 +242,43 @@ export default function AdminDoctorsPage() {
               const initials = doc.name?.substring(0,2).toUpperCase() || "DR";
 
               return (
-                <div key={doc.id} className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm hover:border-brand/30 transition-colors">
-                  <div className="flex items-center gap-4">
+                <div key={doc.id} className="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-5 shadow-sm hover:shadow-md hover:border-brand/30 transition-all group">
+                  <div className="flex items-start gap-4">
                     {/* Avatar circle */}
-                    <div className="w-12 h-12 bg-brand/10 text-brand rounded-full flex items-center justify-center flex-shrink-0 text-lg font-semibold font-inter">
+                    <div className="w-14 h-14 bg-brand/5 text-brand rounded-full flex items-center justify-center flex-shrink-0 text-xl font-bold font-sora border border-brand/10">
                       {initials}
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-base font-inter text-slate-800">{doc.name}</h3>
-                        <span className="bg-brand-light text-brand text-xs px-2 py-0.5 rounded-full font-inter font-medium">
+                        <h3 className="font-bold text-lg font-sora text-slate-800 group-hover:text-brand transition-colors">{doc.name}</h3>
+                        <span className="bg-brand-light text-brand text-xs px-2.5 py-0.5 rounded-full font-inter font-semibold">
                           {profile?.specialisation || "General"}
                         </span>
                       </div>
-                      <p className="text-xs text-slate-500 font-inter">
-                        Slots: {profile?.slotDuration} min &middot; {workingHours.start}&ndash;{workingHours.end}
-                      </p>
+                      <div className="flex flex-col gap-1 mt-2">
+                        <div className="flex items-center text-sm text-slate-500 font-inter">
+                          <User size={14} className="mr-1.5 opacity-70" />
+                          {doc.email}
+                        </div>
+                        <div className="flex items-center text-sm text-slate-500 font-inter">
+                          <CalIcon size={14} className="mr-1.5 opacity-70" />
+                          Slots: {profile?.slotDuration} min &middot; {workingHours.start}&ndash;{workingHours.end}
+                        </div>
+                      </div>
                     </div>
                   </div>
                   
-                  <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 w-full sm:w-auto">
+                  <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 w-full sm:w-auto mt-2 sm:mt-0 pt-4 sm:pt-0 border-t sm:border-0 border-slate-100">
                     {leaveStr && (
-                      <div className="flex items-center gap-1.5 text-xs font-medium text-warn font-inter">
-                        <span className="w-2 h-2 rounded-full bg-warn inline-block"></span>
+                      <div className="flex items-center gap-1.5 text-xs font-semibold text-warn bg-warn/10 px-2.5 py-1 rounded-full font-inter">
+                        <span className="w-2 h-2 rounded-full bg-warn inline-block animate-pulse"></span>
                         On leave {leaveStr}
                       </div>
                     )}
                     <Link href={`/admin/doctors/${doc.id}`}>
-                      <Button variant="ghost" className="text-brand hover:text-brand hover:bg-brand/5">
-                        Manage
+                      <Button variant="outline" className="text-brand border-brand/20 hover:bg-brand hover:text-white transition-all font-inter shadow-sm">
+                        <Settings size={16} className="mr-2" />
+                        Edit Profile
                       </Button>
                     </Link>
                   </div>

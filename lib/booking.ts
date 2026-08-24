@@ -1,4 +1,5 @@
 import { prisma } from "./prisma";
+import { isSlotInPastIST, parseISTToUTC } from "./timezone";
 
 export function generateSlots(
   workingHours: { start: string; end: string },
@@ -62,15 +63,22 @@ export async function getAvailableSlots(doctorId: string, date: string): Promise
     })
   );
 
-  return allSlots.filter(s => !bookedTimes.has(s));
+  const available = allSlots.filter(s => !bookedTimes.has(s));
+
+  // Filter out past slots
+  return available.filter(slotTime => !isSlotInPastIST(date, slotTime));
 }
 
 export async function holdSlot(patientId: string, doctorId: string, date: string, time: string) {
+  if (isSlotInPastIST(date, time)) {
+    throw new Error("This appointment slot has already passed.");
+  }
+
   // SQLite doesn't have true serializable tx locks like Postgres FOR UPDATE,
   // but we can simulate a safe check and create using findFirst + create
   // within a transaction. Since this is just SQLite, it's sequential anyway.
   
-  const scheduledAt = new Date(`${date}T${time}:00.000Z`);
+  const scheduledAt = parseISTToUTC(date, time);
 
   return await prisma.$transaction(async (tx) => {
     // 1. Check if it's already booked/held
@@ -101,19 +109,11 @@ export async function holdSlot(patientId: string, doctorId: string, date: string
 }
 
 export async function confirmSlot(appointmentId: string, symptoms: string) {
-  // Simple AI mock for urgency and summary
-  const urgencyLevel = symptoms.toLowerCase().includes("pain") ? "High" : "Low";
-  const chiefConcern = symptoms.substring(0, 50) + "...";
-  const aiQuestions = "1. How long has this been happening?\n2. Have you taken any medication for it?\n3. Any other symptoms?";
-  
   return await prisma.appointment.update({
     where: { id: appointmentId },
     data: {
       status: "CONFIRMED",
-      symptoms,
-      urgencyLevel,
-      chiefConcern,
-      aiQuestions
+      symptoms
     }
   });
 }

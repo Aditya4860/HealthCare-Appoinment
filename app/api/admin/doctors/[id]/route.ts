@@ -4,6 +4,9 @@ import { requireRole } from "@/lib/auth";
 import { z } from "zod";
 
 const updateDoctorSchema = z.object({
+  name: z.string().min(1, "Name cannot be empty").optional(),
+  email: z.string().email("Invalid email").optional(),
+  password: z.string().min(8, "Password must be at least 8 characters").optional(),
   specialisation: z.string().min(1).optional(),
   slotDuration: z.number().int().positive().optional(),
   workingHours: z
@@ -34,32 +37,60 @@ export async function PATCH(
 
     const { id } = params; // Doctor's User ID
 
-    // Find the doctor profile
-    const doctorProfile = await prisma.doctorProfile.findUnique({
-      where: { userId: id },
+    // Find the doctor user and profile
+    const doctorUser = await prisma.user.findUnique({
+      where: { id },
+      include: { doctorProfile: true }
     });
 
-    if (!doctorProfile) {
+    if (!doctorUser || !doctorUser.doctorProfile) {
       return NextResponse.json(
-        { error: "Doctor profile not found" },
+        { error: "Doctor not found" },
         { status: 404 }
       );
     }
 
+    const { name, email, password, specialisation, slotDuration, workingHours } = parsed.data;
+
+    // Optional user updates
+    const userUpdates: any = {};
+    if (name !== undefined) userUpdates.name = name;
+    if (email !== undefined) {
+      const existing = await prisma.user.findUnique({ where: { email } });
+      if (existing && existing.id !== id) {
+        return NextResponse.json({ error: "Email already in use" }, { status: 409 });
+      }
+      userUpdates.email = email;
+    }
+    if (password) {
+      // Must import bcrypt here or at top of file, let's assume I need to import it.
+      // Wait, let's just make sure bcrypt is imported at the top of the file!
+      const bcrypt = require("bcryptjs");
+      userUpdates.password = await bcrypt.hash(password, 10);
+    }
+
+    if (Object.keys(userUpdates).length > 0) {
+      await prisma.user.update({
+        where: { id },
+        data: userUpdates
+      });
+    }
+
     const dataToUpdate: Record<string, string | number> = {};
-    if (parsed.data.specialisation !== undefined) {
-      dataToUpdate.specialisation = parsed.data.specialisation;
+    if (specialisation !== undefined) {
+      dataToUpdate.specialisation = specialisation;
     }
-    if (parsed.data.slotDuration !== undefined) {
-      dataToUpdate.slotDuration = parsed.data.slotDuration;
+    if (slotDuration !== undefined) {
+      dataToUpdate.slotDuration = slotDuration;
     }
-    if (parsed.data.workingHours !== undefined) {
-      dataToUpdate.workingHours = JSON.stringify(parsed.data.workingHours);
+    if (workingHours !== undefined) {
+      dataToUpdate.workingHours = JSON.stringify(workingHours);
     }
 
     const updated = await prisma.doctorProfile.update({
       where: { userId: id },
       data: dataToUpdate,
+      include: { user: true }
     });
 
     return NextResponse.json({ profile: updated });

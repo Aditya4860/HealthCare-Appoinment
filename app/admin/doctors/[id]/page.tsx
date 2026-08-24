@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/Navbar";
-import { Loader2, ArrowLeft } from "lucide-react";
+import { CheckCircle2, User, Loader2, ArrowLeft, Stethoscope, Clock, Calendar as CalIcon, Settings, X, Plus } from "lucide-react";
+import { formatIST } from "@/lib/timezone";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,9 @@ export default function DoctorDetailPage() {
   const [loading, setLoading] = useState(true);
   
   // Profile Form
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [specialisation, setSpecialisation] = useState("");
   const [slotDuration, setSlotDuration] = useState(30);
   const [workStart, setWorkStart] = useState("");
@@ -40,6 +44,8 @@ export default function DoctorDetailPage() {
         const doc = data.doctors.find((d: any) => d.id === id);
         if (doc) {
           setDoctor(doc);
+          setName(doc.name || "");
+          setEmail(doc.email || "");
           setSpecialisation(doc.doctorProfile?.specialisation || "");
           setSlotDuration(doc.doctorProfile?.slotDuration || 30);
           try {
@@ -65,20 +71,27 @@ export default function DoctorDetailPage() {
     setSavingProfile(true);
     
     try {
+      const payload: any = {
+        name,
+        email,
+        specialisation,
+        slotDuration,
+        workingHours: { start: workStart, end: workEnd }
+      };
+      if (password) payload.password = password;
+
       const res = await fetch(`/api/admin/doctors/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          specialisation,
-          slotDuration,
-          workingHours: { start: workStart, end: workEnd }
-        }),
+        body: JSON.stringify(payload),
       });
-      if (!res.ok) throw new Error("Failed to update");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to update");
       toast.success("Doctor profile updated successfully.");
+      setPassword(""); // Clear password field
       await fetchDoctor();
-    } catch {
-      toast.error("Failed to update profile.");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update profile.");
     } finally {
       setSavingProfile(false);
     }
@@ -161,17 +174,34 @@ export default function DoctorDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column: Doctor Profile (col-span-2) */}
           <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm h-fit">
-            <h2 className="text-xl font-bold font-sora text-slate-800 mb-6">Doctor Profile</h2>
+            <h2 className="text-xl font-bold font-sora text-slate-800 mb-6">Edit Profile</h2>
             <form onSubmit={handleUpdateProfile} className="space-y-6">
               
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="font-inter">Full Name</Label>
+                  <Input type="text" required value={name} onChange={e => setName(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label className="font-inter">Email Address</Label>
+                  <Input type="email" required value={email} onChange={e => setEmail(e.target.value)} />
+                </div>
+              </div>
+
               <div className="space-y-2">
-                <Label className="font-inter">Specialisation</Label>
-                <Input type="text" required value={specialisation} onChange={e => setSpecialisation(e.target.value)} />
+                <Label className="font-inter">New Password</Label>
+                <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Leave blank to keep current password" minLength={8} />
               </div>
               
-              <div className="space-y-2">
-                <Label className="font-inter">Slot Duration (minutes)</Label>
-                <Input type="number" required value={slotDuration} onChange={e => setSlotDuration(parseInt(e.target.value))} min={5}/>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="font-inter">Specialisation</Label>
+                  <Input type="text" required value={specialisation} onChange={e => setSpecialisation(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label className="font-inter">Slot Duration (minutes)</Label>
+                  <Input type="number" required value={slotDuration} onChange={e => setSlotDuration(parseInt(e.target.value))} min={5}/>
+                </div>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
@@ -186,8 +216,9 @@ export default function DoctorDetailPage() {
               </div>
 
               <div className="pt-2">
-                <Button type="submit" disabled={savingProfile} className="bg-brand hover:bg-brand/90 text-white font-inter">
-                  {savingProfile ? <Loader2 size={16} className="animate-spin" /> : "Save Changes"}
+                <Button type="submit" disabled={savingProfile} className="bg-brand hover:bg-brand/90 text-white font-inter w-full md:w-auto">
+                  {savingProfile ? <Loader2 size={16} className="animate-spin mr-2" /> : <CheckCircle2 size={16} className="mr-2" />}
+                  Save Changes
                 </Button>
               </div>
             </form>
@@ -226,7 +257,7 @@ export default function DoctorDetailPage() {
                   {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   {doctor.doctorProfile?.leaves?.map((leave: any) => {
                     const dateObj = new Date(leave.date);
-                    const dateStr = dateObj.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+                    const dateStr = formatIST(dateObj, "EEE, d MMM yyyy");
                     return (
                       <li key={leave.id} className="flex items-center justify-between p-3 rounded-lg border border-slate-100 bg-slate-50 font-inter text-sm">
                         <span className="font-medium text-slate-700">{dateStr}</span>

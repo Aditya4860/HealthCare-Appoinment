@@ -4,8 +4,11 @@ import { verifyToken } from "@/lib/auth";
 import { Navbar } from "@/components/Navbar";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
+import { formatIST, getCurrentISTDate } from "@/lib/timezone";
 import { generateSlots } from "@/lib/booking";
+import { Calendar, CheckCircle } from "lucide-react";
 
 export const metadata = { title: "Doctor Dashboard — MediBook" };
 
@@ -19,7 +22,7 @@ export default async function DoctorDashboardPage() {
 
   const doctor = await prisma.user.findUnique({
     where: { id: session.userId },
-    include: { doctorProfile: true }
+    include: { doctorProfile: true, calendarToken: true }
   });
 
   if (!doctor || !doctor.doctorProfile) {
@@ -63,7 +66,7 @@ export default async function DoctorDashboardPage() {
     where: {
       doctorId: session.userId,
       scheduledAt: { gte: endOfDay },
-      status: { not: "CANCELLED" }
+      status: { notIn: ["CANCELLED", "COMPLETED"] }
     },
     include: { patient: true },
     orderBy: { scheduledAt: "asc" },
@@ -89,25 +92,40 @@ export default async function DoctorDashboardPage() {
       <Navbar userName={doctor.name?.split(" ")[0] || "Doctor"} role="DOCTOR" />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-2xl font-bold font-sora text-brand mb-8">
-          {doctor.name?.startsWith('Dr.') ? doctor.name : `Dr. ${doctor.name}`}'s Schedule
-        </h1>
+        <div className="flex justify-between items-end mb-8">
+          <h2 className="text-xl font-bold font-sora text-slate-800">
+            Appointments for {formatIST(getCurrentISTDate(), "EEEE, MMM d, yyyy")}
+          </h2>
+          {doctor.calendarToken ? (
+             <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-3 py-1.5 rounded-full font-inter">
+               <CheckCircle size={14} /> Calendar Connected
+             </span>
+          ) : (
+            <a href="/api/calendar/auth">
+              <Button variant="outline" size="sm" className="font-inter text-xs rounded-full border-slate-200 text-slate-600 hover:bg-slate-50 gap-1.5">
+                <Calendar size={14} /> Connect Google Calendar
+              </Button>
+            </a>
+          )}
+        </div>
 
         {/* Stats row */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
           {[
-            { label: "Today", value: todayCount },
-            { label: "This Week", value: weekCount },
-            { label: "Completed", value: completedCount },
+            { label: "Today", value: todayCount, filter: "today" },
+            { label: "This Week", value: weekCount, filter: "week" },
+            { label: "Completed", value: completedCount, filter: "completed" },
           ].map((stat) => (
-            <div key={stat.label} className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
-              <p className="text-3xl font-semibold font-sora text-brand mb-1">
-                {stat.value}
-              </p>
-              <p className="text-sm text-slate-500 font-inter">
-                {stat.label}
-              </p>
-            </div>
+            <Link key={stat.label} href={`/doctor/appointments?filter=${stat.filter}`} className="block group">
+              <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm group-hover:shadow-md group-hover:border-brand/30 transition-all h-full">
+                <p className="text-3xl font-semibold font-sora text-brand mb-1 group-hover:scale-105 origin-left transition-transform">
+                  {stat.value}
+                </p>
+                <p className="text-sm text-slate-500 font-inter">
+                  {stat.label}
+                </p>
+              </div>
+            </Link>
           ))}
         </div>
 
@@ -168,8 +186,8 @@ export default async function DoctorDashboardPage() {
             <div className="space-y-3">
               {upcoming.length > 0 ? (
                 upcoming.map(app => {
-                  const dateStr = app.scheduledAt.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
-                  const timeStr = app.scheduledAt.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+                  const dateStr = formatIST(app.scheduledAt, "EEE, MMM d");
+                  const timeStr = formatIST(app.scheduledAt, "hh:mm a 'IST'");
                   return (
                     <Link key={app.id} href={`/doctor/appointments/${app.id}`} className="block bg-white rounded-xl border border-slate-200 p-4 shadow-sm hover:border-brand/30 transition-colors">
                       <div className="flex justify-between items-start mb-1">

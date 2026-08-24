@@ -10,6 +10,7 @@ import {
   Stethoscope,
   CalendarCheck,
   Sparkles,
+  ArrowLeft,
 } from "lucide-react";
 
 // ── Password strength ─────────────────────────────────────────────────────────
@@ -158,6 +159,10 @@ export default function RegisterPage() {
           <p className="lg:hidden font-display text-xl font-bold text-brand mb-8">
             MediBook
           </p>
+
+          <Link href="/" className="text-sm font-inter text-slate-500 hover:text-brand flex items-center gap-1.5 mb-8 transition-colors inline-flex">
+            <ArrowLeft size={16} /> Back to main page
+          </Link>
 
           <h1 className="font-display text-2xl text-brand mb-1">
             Create your account

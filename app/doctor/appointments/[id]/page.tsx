@@ -8,6 +8,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Textarea } from "@/components/ui/textarea";
+import { formatIST } from "@/lib/timezone";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AppointmentData = any;
@@ -76,12 +77,22 @@ export default function DoctorAppointmentDetailPage() {
 
   if (!appointment) return null;
 
-  const dateStr = new Date(appointment.scheduledAt).toLocaleDateString("en-US", { weekday: "long", day: "numeric", month: "short", year: "numeric" });
-  const timeStr = new Date(appointment.scheduledAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+  const dateStr = formatIST(appointment.scheduledAt, "EEEE, d MMM yyyy");
+  const timeStr = formatIST(appointment.scheduledAt, "hh:mm a 'IST'");
 
   let aiQuestionsArr: string[] = [];
   if (appointment.aiQuestions) {
-    aiQuestionsArr = appointment.aiQuestions.split("\n").filter((q: string) => q.trim().length > 0);
+    try {
+      const parsed = JSON.parse(appointment.aiQuestions);
+      if (Array.isArray(parsed)) {
+        aiQuestionsArr = parsed;
+      } else {
+        aiQuestionsArr = appointment.aiQuestions.split("\n").filter((q: string) => q.trim().length > 0);
+      }
+    } catch (e) {
+      // Fallback for older data format
+      aiQuestionsArr = appointment.aiQuestions.split("\n").filter((q: string) => q.trim().length > 0);
+    }
   }
 
   let medsArr: any[] = [];

@@ -48,6 +48,14 @@ export default async function AdminDashboardPage() {
     }
   });
 
+  // Fetch some doctors to display on dashboard
+  const recentDoctors = await prisma.user.findMany({
+    where: { role: "DOCTOR" },
+    include: { doctorProfile: true },
+    orderBy: { createdAt: "desc" },
+    take: 5
+  });
+
   return (
     <div className="min-h-screen bg-surface">
       <Navbar userName={session.name || session.email} role="ADMIN" />
@@ -78,17 +86,45 @@ export default async function AdminDashboardPage() {
 
         {/* Doctors Section */}
         <div className="flex items-center justify-between border-b border-slate-200 pb-4 mb-6">
-          <h2 className="text-xl font-bold font-sora text-slate-800">Doctors</h2>
+          <h2 className="text-xl font-bold font-sora text-slate-800">Recent Doctors</h2>
           <Link href="/admin/doctors">
-            <Button variant="default" className="bg-brand hover:bg-brand/90 text-white">
-              Add Doctor
+            <Button variant="outline" className="text-brand border-brand/20 hover:bg-brand hover:text-white transition-colors">
+              Manage All Doctors
             </Button>
           </Link>
         </div>
         
-        <p className="text-sm text-slate-500 font-inter">
-          Manage your hospital's doctors from the Doctors page.
-        </p>
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-10">
+          {recentDoctors.length === 0 ? (
+            <div className="p-8 text-center text-slate-500 font-inter">No doctors found.</div>
+          ) : (
+            <div className="divide-y divide-slate-100">
+              {recentDoctors.map(doc => {
+                const initials = doc.name?.substring(0,2).toUpperCase() || "DR";
+                return (
+                  <div key={doc.id} className="p-5 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-brand/5 text-brand rounded-full flex items-center justify-center font-bold font-sora text-lg border border-brand/10">
+                        {initials}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-slate-800 font-inter text-base">{doc.name}</p>
+                        <p className="text-sm text-slate-500 font-inter mt-0.5">
+                          <span className="font-medium text-brand">{doc.doctorProfile?.specialisation || "General"}</span> &middot; {doc.email}
+                        </p>
+                      </div>
+                    </div>
+                    <Link href={`/admin/doctors/${doc.id}`}>
+                      <Button variant="ghost" className="text-brand hover:bg-brand/10 font-medium font-inter">
+                        Edit Profile
+                      </Button>
+                    </Link>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
 
       </main>
     </div>

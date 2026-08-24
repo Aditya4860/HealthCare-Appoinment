@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Calendar, CheckCircle, ChevronRight, Clock, Info } from "lucide-react";
+import { formatIST, getCurrentISTDate } from "@/lib/timezone";
 import { StatusBadge } from "@/components/StatusBadge";
 
 export const metadata = { title: "Patient Dashboard — MediBook" };
@@ -19,7 +20,8 @@ export default async function PatientDashboardPage() {
   if (!session || session.role !== "PATIENT") redirect("/login");
 
   const user = await prisma.user.findUnique({
-    where: { id: session.userId }
+    where: { id: session.userId },
+    include: { calendarToken: true }
   });
 
   const now = new Date();
@@ -37,9 +39,7 @@ export default async function PatientDashboardPage() {
     orderBy: { scheduledAt: "asc" }
   });
 
-  const todayStr = new Date().toLocaleDateString("en-US", {
-    weekday: "long", month: "long", day: "numeric", year: "numeric"
-  });
+  const todayStr = formatIST(getCurrentISTDate(), "EEEE, MMMM d, yyyy");
 
   return (
     <div className="min-h-screen bg-surface">
@@ -71,8 +71,8 @@ export default async function PatientDashboardPage() {
             ) : (
               <div className="space-y-4">
                 {appointments.map((app) => {
-                  const dateStr = app.scheduledAt.toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" });
-                  const timeStr = app.scheduledAt.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+                  const dateStr = formatIST(app.scheduledAt, "EEE, MMM d");
+                  const timeStr = formatIST(app.scheduledAt, "hh:mm a 'IST'");
                   
                   return (
                     <div key={app.id} className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:border-brand/30 transition-colors">
@@ -141,9 +141,17 @@ export default async function PatientDashboardPage() {
                   <Calendar size={16} /> Connect Google Calendar
                 </h3>
                 <p className="text-xs text-slate-500 mb-3 font-inter">Sync appointments to your calendar</p>
-                <Button variant="ghost" className="w-full text-brand bg-brand/5 hover:bg-brand/10 font-inter text-sm h-10 rounded-xl justify-center">
-                  Connect Calendar
-                </Button>
+                {user?.calendarToken ? (
+                  <Button disabled className="w-full text-green-700 bg-green-50 border border-green-200 font-inter text-sm h-10 rounded-xl justify-center opacity-100">
+                    <CheckCircle size={16} className="mr-2" /> Connected
+                  </Button>
+                ) : (
+                  <a href="/api/calendar/auth" className="w-full block">
+                    <Button variant="ghost" className="w-full text-brand bg-brand/5 hover:bg-brand/10 font-inter text-sm h-10 rounded-xl justify-center">
+                      Connect Calendar
+                    </Button>
+                  </a>
+                )}
               </div>
             </div>
             

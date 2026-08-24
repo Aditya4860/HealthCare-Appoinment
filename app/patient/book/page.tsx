@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Loader2, Calendar as CalIcon, Clock, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { formatIST } from "@/lib/timezone";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -275,7 +276,7 @@ export default function BookAppointmentPage() {
 
               {selectedDate && (
                 <div>
-                  <p className="text-sm text-slate-500 font-inter mb-4">Available slots for {new Date(selectedDate).toLocaleDateString()}</p>
+                  <p className="text-sm text-slate-500 font-inter mb-4">Available slots for {formatIST(selectedDate, "MMM d, yyyy")}</p>
                   
                   {loadingSlots ? (
                     <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
@@ -331,7 +332,7 @@ export default function BookAppointmentPage() {
               <div className="flex items-center gap-3">
                 <CalIcon className="text-brand" size={20} />
                 <div className="font-inter text-sm text-brand">
-                  <span className="font-semibold">{selectedDoc.name}</span> &middot; {new Date(selectedDate).toLocaleDateString()} at {selectedTime}
+                  <span className="font-semibold">{selectedDoc.name}</span> &middot; {formatIST(selectedDate, "MMM d, yyyy")} at {selectedTime}
                 </div>
               </div>
               <Button variant="ghost" size="sm" onClick={() => setStep(2)} className="text-brand hover:bg-brand/10 h-8">
@@ -401,7 +402,7 @@ export default function BookAppointmentPage() {
                 </div>
                 <div className="flex justify-between border-b border-brand/10 pb-2">
                   <span className="text-slate-500">Date</span>
-                  <span className="font-semibold text-slate-800">{new Date(selectedDate).toLocaleDateString()}</span>
+                  <span className="font-semibold text-slate-800">{formatIST(selectedDate, "MMM d, yyyy")}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Time</span>

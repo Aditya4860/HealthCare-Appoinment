@@ -102,6 +102,9 @@ export default function LoginPage() {
           
           {step === 1 && (
             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+              <Link href="/" className="text-sm font-inter text-slate-500 hover:text-brand flex items-center gap-1.5 mb-8 transition-colors inline-flex">
+                <ArrowLeft size={16} /> Back to main page
+              </Link>
               <h2 className="font-sora text-2xl font-bold text-brand mb-2">Sign in as...</h2>
               <p className="font-inter text-sm text-slate-500 mb-8">Choose your role to continue</p>
               

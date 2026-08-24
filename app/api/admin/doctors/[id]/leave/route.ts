@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
+import { queueEmail } from "@/lib/email";
+import { deleteEvent } from "@/lib/calendar";
 import { z } from "zod";
 
 const leaveSchema = z.object({
@@ -82,14 +84,16 @@ export async function POST(
           data: { status: "CANCELLED" },
         });
 
-        await tx.notification.create({
-          data: {
-            userId: appt.patientId,
-            type: "cancellation",
-            subject: "Appointment Cancelled",
-            body: `Your appointment on ${date} was cancelled due to doctor leave.`,
-          },
-        });
+        await queueEmail(
+          tx,
+          appt.patientId,
+          "cancellation",
+          "Appointment Cancelled",
+          `Your appointment on ${date} was cancelled due to doctor leave.`
+        );
+
+        if (appt.calEventPatient) deleteEvent(appt.patientId, appt.calEventPatient).catch(console.error);
+        if (appt.calEventDoctor) deleteEvent(appt.doctorId, appt.calEventDoctor).catch(console.error);
       }
 
       return appointments.length;

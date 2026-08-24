@@ -6,6 +6,7 @@ import { Loader2, ArrowLeft, Calendar as CalIcon, Clock } from "lucide-react";
 import Link from "next/link";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
+import { formatIST } from "@/lib/timezone";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AppointmentData = any;
@@ -54,8 +55,8 @@ export default function AllAppointmentsPage() {
         ) : (
           <div className="space-y-4">
             {appointments.map((app) => {
-              const dateStr = new Date(app.scheduledAt).toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
-              const timeStr = new Date(app.scheduledAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+              const dateStr = formatIST(app.scheduledAt, "EEE, MMM d, yyyy");
+              const timeStr = formatIST(app.scheduledAt, "hh:mm a 'IST'");
               
               return (
                 <Link key={app.id} href={`/patient/appointments/${app.id}`} className="block bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:border-brand/30 hover:shadow-md transition-all">
