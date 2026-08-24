@@ -200,9 +200,13 @@ export default function LoginPage() {
                       <button
                         key={r}
                         onClick={() => handleFillDemo(r)}
-                        className="w-full text-left text-xs px-3 py-2 rounded-lg border border-slate-100 hover:bg-[#EDE9FF]/30 hover:border-[#7C6FCD]/30 transition-colors font-medium capitalize text-slate-600"
+                        className="w-full flex items-center justify-between text-left px-4 py-3 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-[#EDE9FF]/50 hover:border-[#7C6FCD]/50 transition-all group"
                       >
-                        Fill as {r} demo
+                        <div>
+                          <p className="font-semibold text-slate-700 capitalize text-sm group-hover:text-[#1B3A6B]">{r} Demo</p>
+                          <p className="text-xs text-slate-500">{r === 'doctor' ? 'sarah' : r}@medibook.com</p>
+                        </div>
+                        <span className="text-[10px] uppercase font-bold text-[#7C6FCD] bg-[#EDE9FF] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">Autofill</span>
                       </button>
                     ))}
                   </div>
